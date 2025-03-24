@@ -37,7 +37,7 @@ class MLP(nn.Module):
         x = self.in_projection(x)
         t = self.gen_t_embedding(t)
         t = self.t_projection(t)
-        x = x + t 
+        x = x + t
         x = self.blocks(x)
         x = self.out_projection(x)
         return x

@@ -1,7 +1,7 @@
 import argparse
 import logging
 import sys
-import os, re
+import os
 import torch
 import tqdm
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

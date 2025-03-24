@@ -1,7 +1,6 @@
 import argparse
 import logging
 import sys
-import os, re
 import torch
 import tqdm
 from utils.data import Checkerboard
@@ -22,7 +21,7 @@ def sampling(cboard, plot_steps):
     torch.manual_seed(42)
     # Setting the device to work with
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
+
     flow_matching_model = MLP(layers=5, channels=512)
     checkpoint = torch.load('saved_models/flow_matching_mlp_model.pth', map_location=torch.device('cpu'))
     flow_matching_model.load_state_dict(checkpoint['model_state_dict'])

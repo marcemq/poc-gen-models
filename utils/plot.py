@@ -1,6 +1,4 @@
 import logging
-import numpy as np
-from torch import nn
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.animation import PillowWriter
