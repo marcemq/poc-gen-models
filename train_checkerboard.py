@@ -27,20 +27,19 @@ def train(cboard):
     # data generation and plot
     plot_checkerboard(cboard)
     # model definition
-    model = MLP(layers=5, channels=512)
+    model = MLP(layers=5, channels=512).to(device)
     optim = torch.optim.AdamW(model.parameters(), lr=1e-4)
-    model.to(device)
 
-    data = torch.Tensor(cboard.sampled_points)
+    data = torch.Tensor(cboard.sampled_points).to(device)
     training_steps = 100_000
     batch_size = 64
     pbar = tqdm.tqdm(range(training_steps), desc="Training")
     losses = []
     for i in pbar:
         x1 = data[torch.randint(data.size(0), (batch_size,))]
-        x0 = torch.randn_like(x1)
+        x0 = torch.randn_like(x1, device=device)
         target = x1 - x0
-        t = torch.rand(x1.size(0))
+        t = torch.rand(x1.size(0), device=device)
         xt = (1 - t[:, None]) * x0 + t[:, None] * x1
         pred = model(xt, t)  # also add t here
         loss = ((target - pred)**2).mean()
