@@ -15,7 +15,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(messa
                     datefmt='%H:%M:%S',
                     level=logging.INFO,
                     handlers=[
-                        logging.FileHandler("myLogs.log"),
+                        logging.FileHandler("logs/training.log"),
                         logging.StreamHandler(sys.stdout)]
                     )
 
@@ -41,7 +41,7 @@ def train(cboard):
         target = x1 - x0
         t = torch.rand(x1.size(0), device=device)
         xt = (1 - t[:, None]) * x0 + t[:, None] * x1
-        pred = model(xt, t)  # also add t here
+        pred = model(xt, t)
         loss = ((target - pred)**2).mean()
         loss.backward()
         optim.step()

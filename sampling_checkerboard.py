@@ -12,7 +12,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(messa
                     datefmt='%H:%M:%S',
                     level=logging.INFO,
                     handlers=[
-                        logging.FileHandler("myLogs.log"),
+                        logging.FileHandler("logs/sampling.log"),
                         logging.StreamHandler(sys.stdout)]
                     )
 
@@ -28,12 +28,12 @@ def sampling(cboard, plot_steps):
     flow_matching_model.to(device)
     flow_matching_model.eval().requires_grad_(False)
 
-    xt = torch.randn(1000, 2)
+    xt = torch.randn(1000, 2, device=device)
     steps = 1000
     xt_over_time = []
     xt_over_time.append((0, xt))
     pbar = tqdm.tqdm(range(1, steps + 1), desc="Sampling")
-    for i, t in enumerate(torch.linspace(0, 1, steps), start=1):
+    for i, t in enumerate(torch.linspace(0, 1, steps, device=device), start=1):
         pred = flow_matching_model(xt, t.expand(xt.size(0)))
         xt = xt + (1 / steps) * pred
         if i % plot_steps == 0:
