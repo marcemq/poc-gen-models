@@ -34,8 +34,8 @@ def train(batched_train_data, epochs):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # model definition
     model_unet = UNet(
-    input_channels          = batched_train_data["images"][0].shape,
-    output_channels         = batched_train_data["images"][0].shape,
+    input_channels          = 3,
+    output_channels         = 3,
     base_channels           = ModelConfig.BASE_CH,
     base_channels_multiples = ModelConfig.BASE_CH_MULT,
     apply_attention         = ModelConfig.APPLY_ATTENTION,
@@ -78,5 +78,4 @@ if __name__ == '__main__':
     custom_transform = CustomTransform()
     train_data=ButterfliesDataset(transform=custom_transform)
     batched_train_data = DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=6)
-    print(f"shape of each image:{batched_train_data["images"][0].shape}")
     train(batched_train_data, args.epochs)
