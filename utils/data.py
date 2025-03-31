@@ -67,8 +67,8 @@ class CustomTransform():
 class ButterfliesDataset(Dataset):
     def __init__(self, transform):
         self.transform = transform
-        dataset_name = "huggan/smithsonian_butterflies_subset"
-        self.raw_dataset = load_dataset(dataset_name, split="train")
+        dataset_path = "~/datasets/butterflies_dataset"
+        self.raw_dataset = load_dataset(dataset_path, split="train")
         self.imgs_dataset = self.transform(self.raw_dataset)
 
     def __len__(self):
