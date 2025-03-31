@@ -49,7 +49,7 @@ def train(batched_train_data, epochs):
     losses = []
     for epoch in range(1, epochs + 1):
         for batch in batched_train_data:
-            x1 = batch["images"]
+            x1 = batch
             x0 = torch.randn_like(x1, device=device)
             target = x1 - x0
             t = torch.rand(x1.size(0), device=device)

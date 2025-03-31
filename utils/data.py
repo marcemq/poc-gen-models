@@ -48,27 +48,25 @@ class Checkerboard(object):
         logging.info(f'Sampled points shape:{sampled_points.shape}')
         return sampled_points
     
-class CustomTransform():
-    def __call__(self, raw_dataset):
+class CustomTransform:
+    def __init__(self):
         image_size = 64
-        preprocess = transforms.Compose(
-            [
-                transforms.Resize((image_size,image_size)),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                # The following is very important: it normalizes the color values
-                # in the range [-1,1] (the original ones are within [0,1])
-                transforms.Normalize([0.5], [0.5]),
-            ]
-        )
-        imgs_dataset = [preprocess(image.convert("RGB")) for image in raw_dataset["image"]]
-        return {"images": imgs_dataset}
+        self.preprocess = transforms.Compose([
+            transforms.Resize((image_size, image_size)),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5], [0.5]),
+        ])
+
+    def __call__(self, images):
+        return [self.preprocess(img.convert("RGB")) for img in images]
 
 class ButterfliesDataset(Dataset):
     def __init__(self, transform):
         self.transform = transform
-        dataset_path = "~/datasets/butterflies_dataset"
+        dataset_path = "/home/marcelamq/datasets/butterflies_dataset"
         self.raw_dataset = load_dataset(dataset_path, split="train")
+        print(f"raw_dataset:{self.raw_dataset.column_names}")
         self.imgs_dataset = self.transform(self.raw_dataset)
 
     def __len__(self):
