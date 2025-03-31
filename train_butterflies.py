@@ -6,10 +6,11 @@ import torch
 import tqdm
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
+from torch.utils.data import DataLoader
 from utils.data import ButterfliesDataset, CustomTransform
 from models.unet import UNet
 from utils.utils import create_directory
-from utils.plot import plot_checkerboard
+
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
@@ -33,8 +34,8 @@ def train(batched_train_data, epochs):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # model definition
     model_unet = UNet(
-    input_channels          = (3, 64, 64),
-    output_channels         = (3, 64, 64),
+    input_channels          = batched_train_data["images"][0].shape,
+    output_channels         = batched_train_data["images"][0].shape,
     base_channels           = ModelConfig.BASE_CH,
     base_channels_multiples = ModelConfig.BASE_CH_MULT,
     apply_attention         = ModelConfig.APPLY_ATTENTION,
@@ -44,7 +45,6 @@ def train(batched_train_data, epochs):
     optim = torch.optim.AdamW(model_unet.parameters(), lr=1e-4)
 
     training_steps = 100_000
-    batch_size = 16
     pbar = tqdm.tqdm(range(training_steps), desc="Training")
     losses = []
     for epoch in range(1, epochs + 1):
@@ -72,8 +72,11 @@ def train(batched_train_data, epochs):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A script to train a flow matching model for Butterflies dataset.")
     parser.add_argument('--epochs', type=int, default=10000, help='Epochs for training')
+    parser.add_argument('--batch_size', type=int, default=16, help='Batch size used for training')
     args = parser.parse_args()
 
     custom_transform = CustomTransform()
-    batched_train_data=ButterfliesDataset(transform=custom_transform)
+    train_data=ButterfliesDataset(transform=custom_transform)
+    batched_train_data = DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=6)
+    print(f"shape of each image:{batched_train_data["images"][0].shape}")
     train(batched_train_data, args.epochs)
