@@ -72,7 +72,7 @@ class ButterfliesDataset(Dataset):
         self.imgs_dataset = self.transform(self.raw_dataset)
 
     def __len__(self):
-        return len(self.dataset)
+        return len(self.imgs_dataset)
     
     def __getitem__(self, idx):
-        return datasets[idx]
+        return self.imgs_dataset[idx]
