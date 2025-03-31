@@ -1,5 +1,9 @@
 import logging
 import numpy as np
+from torch.utils.data import Dataset, DataLoader
+import torchvision.datasets as datasets
+from datasets import load_dataset
+from torchvision import transforms
 
 class Checkerboard(object):
     def __init__(self, N=1000, x_min=-4, x_max=4, y_min=-4, y_max=4, length=4):
@@ -43,3 +47,32 @@ class Checkerboard(object):
         sampled_points = np.array(sampled_points)
         logging.info(f'Sampled points shape:{sampled_points.shape}')
         return sampled_points
+    
+class CustomTransform():
+    def __call__(self, raw_dataset):
+        image_size = 64
+        preprocess = transforms.Compose(
+            [
+                transforms.Resize((image_size,image_size)),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                # The following is very important: it normalizes the color values
+                # in the range [-1,1] (the original ones are within [0,1])
+                transforms.Normalize([0.5], [0.5]),
+            ]
+        )
+        imgs_dataset = [preprocess(image.convert("RGB")) for image in raw_dataset["image"]]
+        return {"images": imgs_dataset}
+
+class ButterfliesDataset(Dataset):
+    def __init__(self, transform):
+        self.transform = transform
+        dataset_name = "huggan/smithsonian_butterflies_subset"
+        self.raw_dataset = load_dataset(dataset_name, split="train")
+        self.imgs_dataset = self.transform(self.raw_dataset)
+
+    def __len__(self):
+        return len(self.dataset)
+    
+    def __getitem__(self, idx):
+        return datasets[idx]
