@@ -44,13 +44,13 @@ def sampling(plot_steps, num_samples=16):
     fm_unet_model.to(device)
     fm_unet_model.eval().requires_grad_(False)
 
-    xt = torch.randn(num_samples, (3,64,64), device=device)
+    xt = torch.randn((num_samples,3,64,64), device=device)
     steps = 1000
     xt_over_time = []
     xt_over_time.append((0, xt))
     pbar = tqdm.tqdm(range(1, steps + 1), desc="Sampling")
     for i, t in enumerate(torch.linspace(0, 1, steps, device=device), start=1):
-        pred = fm_unet_model(xt, t.expand(xt.size(0)))
+        pred = fm_unet_model(xt, (t*1000).expand(xt.size(0)).long())
         xt = xt + (1 / steps) * pred
         if i % plot_steps == 0:
             xt_over_time.append((t, xt))
