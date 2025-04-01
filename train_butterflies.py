@@ -52,7 +52,7 @@ def train(batched_train_data, epochs):
             x1 = batch.to(device)
             x0 = torch.randn_like(x1, device=device)
             target = x1 - x0
-            t = torch.rand(x1.size(0), device=device)
+            t = torch.rand(x1.size(0), device=device).view(-1, 1, 1, 1)
             xt = (1 - t[:, None]) * x0 + t[:, None] * x1
             pred = model_unet(xt, t)
             loss = ((target - pred)**2).mean()
