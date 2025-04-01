@@ -68,6 +68,4 @@ if __name__ == '__main__':
     parser.add_argument('--plot_steps', type=int, default=20, help='Var to tell plot sampling every certain steps')
     args = parser.parse_args()
 
-    train_data=ButterfliesDataset(transform=CustomTransform())
-    batched_train_data = DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=6)
-    sampling(batched_train_data, args.plot_steps, args.num_samples)
+    sampling(args.plot_steps, args.num_samples)
