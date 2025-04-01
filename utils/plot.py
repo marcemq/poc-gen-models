@@ -4,6 +4,8 @@ import matplotlib.animation as animation
 from matplotlib.animation import PillowWriter
 from matplotlib.colors import ListedColormap
 from utils.utils import create_directory
+from utils.data import inverse_transform
+from torchvision.utils import make_grid
 
 def plot_checkerboard(cboard, saveImg=True):
     create_directory("images")
@@ -20,7 +22,7 @@ def plot_checkerboard(cboard, saveImg=True):
         fig.savefig("images/checkerboard.png", format='png', bbox_inches='tight')
 
 def plot_checkerboard_over_time(xt_over_time, cboard):
-    title =  f"Sampling of xt over time"
+    title =  f"Sampling of checkerboard over time"
     fig, ax = plt.subplots(figsize=(6, 6))
     # Plot checkerboard background
     ax.imshow(cboard.checkerboard_pattern, extent=(cboard.x_min, cboard.x_max, cboard.y_min, cboard.y_max), origin="lower", cmap=ListedColormap(["purple", "yellow"]))
@@ -41,8 +43,33 @@ def plot_checkerboard_over_time(xt_over_time, cboard):
 
     # Set up animation for the current sequence
     ani = animation.FuncAnimation(fig, update, frames=len(xt_over_time), repeat=True)
-    gif_name = "images/xt_over_time.gif"
+    gif_name = "images/checkerboard_over_time.gif"
     ani.save(gif_name, writer=PillowWriter(fps=5))
     plt.close(fig)
 
-    logging.info("Xt over time gif saved at images dir")
+    logging.info("Checkerboard over time gif saved at images dir")
+
+def plot_butterflies_over_time(xt_over_time):
+    title =  f"Sampling of butterflies over time"
+    fig, ax = plt.subplots(figsize=(7, 7))
+
+    # Apply inverse transform to each (t, xt) tuple
+    xt_over_time = [(t, inverse_transform(xt)) for t, xt in xt_over_time]
+
+    ax.set_title(title, fontsize=15, fontweight='bold')
+    frame_text = ax.text(0.5, -0.125, '', transform=ax.transAxes, ha='center', fontsize=11, fontweight='bold')
+
+    def update(frame):
+        t, xt = xt_over_time[frame]
+        frame_text.set_text(f't = {t:.2f}')
+        grid_img = make_grid(xt, nrow=4, padding=True, pad_value=1, normalize=True)
+        grid_img_np = grid_img.permute(1, 2, 0).cpu().numpy()
+        ax.imshow(grid_img_np)
+
+    # Set up animation for the current sequence
+    ani = animation.FuncAnimation(fig, update, frames=len(xt_over_time), repeat=True)
+    gif_name = "images/butterflies_over_time.gif"
+    ani.save(gif_name, writer=PillowWriter(fps=5))
+    plt.close(fig)
+
+    logging.info("Butterflies over time gif saved at images dir")
