@@ -44,8 +44,9 @@ def train(batched_train_data, epochs):
     ).to(device)
     optim = torch.optim.AdamW(model_unet.parameters(), lr=1e-4)
 
-    training_steps = 100_000
-    pbar = tqdm.tqdm(range(training_steps), desc="Training")
+    num_batches = len(batched_train_data)
+    total_steps = epochs * num_batches  # Total training steps
+    pbar = tqdm.tqdm(total=total_steps, desc="Training")
     losses = []
     for epoch in range(1, epochs + 1):
         for batch in batched_train_data:
@@ -60,6 +61,7 @@ def train(batched_train_data, epochs):
             optim.step()
             optim.zero_grad()
             pbar.set_postfix(loss=loss.item())
+            pbar.update(1)
             losses.append(loss.item())
 
     torch.save({
