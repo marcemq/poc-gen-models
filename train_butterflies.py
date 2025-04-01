@@ -54,7 +54,7 @@ def train(batched_train_data, epochs):
             target = x1 - x0
             t = torch.rand(x1.size(0), device=device).view(-1, 1, 1, 1)
             xt = (1 - t[:, None]) * x0 + t[:, None] * x1
-            pred = model_unet(xt, (t*10000).long().view(-1,1))
+            pred = model_unet(xt, (t*1000).long().view(-1,1))
             loss = ((target - pred)**2).mean()
             loss.backward()
             optim.step()
