@@ -75,7 +75,6 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=16, help='Batch size used for training')
     args = parser.parse_args()
 
-    custom_transform = CustomTransform()
-    train_data=ButterfliesDataset(transform=custom_transform)
+    train_data=ButterfliesDataset(transform=CustomTransform())
     batched_train_data = DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=6)
     train(batched_train_data, args.epochs)

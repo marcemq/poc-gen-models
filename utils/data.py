@@ -4,6 +4,8 @@ from torch.utils.data import Dataset, DataLoader
 import torchvision.datasets as datasets
 from datasets import load_dataset
 from torchvision import transforms
+from datasets import features
+import torch
 
 class Checkerboard(object):
     def __init__(self, N=1000, x_min=-4, x_max=4, y_min=-4, y_max=4, length=4):
@@ -58,19 +60,29 @@ class CustomTransform:
             transforms.Normalize([0.5], [0.5]),
         ])
 
-    def __call__(self, images):
-        return [self.preprocess(img.convert("RGB")) for img in images]
+    def __call__(self, image):
+        return self.preprocess(image.convert("RGB"))  # Ensure it's a PIL image
+
+def inverse_transform(tensors):
+    """Convert tensors from [-1., 1.] to [0., 255.]"""
+    return (((tensors.clamp(-1, 1) + 1.0) / 2.0) * 255.0).type(torch.uint8)
 
 class ButterfliesDataset(Dataset):
-    def __init__(self, transform):
+    def __init__(self, transform=None):
         self.transform = transform
-        dataset_path = "/home/marcelamq/datasets/butterflies_dataset"
+        dataset_path = "huggan/smithsonian_butterflies_subset"
         self.raw_dataset = load_dataset(dataset_path, split="train")
-        print(f"raw_dataset:{self.raw_dataset.column_names}")
-        self.imgs_dataset = self.transform(self.raw_dataset)
+        
+        # Ensure images are properly loaded
+        self.raw_dataset = self.raw_dataset.cast_column("image", features.Image())
 
     def __len__(self):
-        return len(self.imgs_dataset)
-    
+        return len(self.raw_dataset)
+
     def __getitem__(self, idx):
-        return self.imgs_dataset[idx]
+        image = self.raw_dataset[idx]["image"]  # Get PIL Image
+        
+        if self.transform:
+            image = self.transform(image)  # Apply transformations
+
+        return image
