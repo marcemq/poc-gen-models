@@ -53,7 +53,6 @@ def sampling(plot_steps, fm_steps, num_samples=16):
         pred = fm_unet_model(xt, time_indices.expand(xt.size(0)))
         xt = xt + (1 / fm_steps) * pred
         if i % plot_steps == 0:
-            xt = xt.clamp(-1, 1)  # Ensure values stay within valid range
             xt_over_time.append((t, xt))
         pbar.update(1)
 
