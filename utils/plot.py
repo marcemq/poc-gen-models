@@ -57,6 +57,8 @@ def plot_butterflies_over_time(xt_over_time):
     xt_over_time = [(t, inverse_transform(xt)) for t, xt in xt_over_time]
 
     ax.set_title(title, fontsize=15, fontweight='bold')
+    ax.set_xticks([])
+    ax.set_yticks([])
     frame_text = ax.text(0.5, -0.125, '', transform=ax.transAxes, ha='center', fontsize=11, fontweight='bold')
 
     def update(frame):
@@ -69,7 +71,7 @@ def plot_butterflies_over_time(xt_over_time):
     # Set up animation for the current sequence
     ani = animation.FuncAnimation(fig, update, frames=len(xt_over_time), repeat=True)
     gif_name = "images/butterflies_over_time.gif"
-    ani.save(gif_name, writer=PillowWriter(fps=5))
+    ani.save(gif_name, writer=PillowWriter(fps=2))
     plt.close(fig)
 
     logging.info("Butterflies over time gif saved at images dir")

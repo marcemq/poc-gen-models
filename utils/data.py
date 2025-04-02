@@ -67,7 +67,7 @@ def inverse_transform(tensors):
     """Convert tensors from [-1., 1.] to [0., 255.]"""
     tensors = tensors.cpu()  # Debugging: move to CPU
     assert torch.isfinite(tensors).all(), "NaN or Inf detected in tensors"
-    return (((tensors.clamp(-1, 1) + 1.0) / 2.0) * 255.0).type(torch.uint8)
+    return (((tensors.clamp(-1, 1) + 1.0) / 2.0) * 255.0)
 
 class ButterfliesDataset(Dataset):
     def __init__(self, transform=None):
