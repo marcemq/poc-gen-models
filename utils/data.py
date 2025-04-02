@@ -1,5 +1,11 @@
 import logging
 import numpy as np
+from torch.utils.data import Dataset, DataLoader
+import torchvision.datasets as datasets
+from datasets import load_dataset
+from torchvision import transforms
+from datasets import features
+import torch
 
 class Checkerboard(object):
     def __init__(self, N=1000, x_min=-4, x_max=4, y_min=-4, y_max=4, length=4):
@@ -43,3 +49,42 @@ class Checkerboard(object):
         sampled_points = np.array(sampled_points)
         logging.info(f'Sampled points shape:{sampled_points.shape}')
         return sampled_points
+    
+class CustomTransform:
+    def __init__(self):
+        image_size = 64
+        self.preprocess = transforms.Compose([
+            transforms.Resize((image_size, image_size)),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5], [0.5]),
+        ])
+
+    def __call__(self, image):
+        return self.preprocess(image.convert("RGB"))  # Ensure it's a PIL image
+
+def inverse_transform(tensors):
+    """Convert tensors from [-1., 1.] to [0., 255.]"""
+    tensors = tensors.cpu()  # Debugging: move to CPU
+    assert torch.isfinite(tensors).all(), "NaN or Inf detected in tensors"
+    return (((tensors.clamp(-1, 1) + 1.0) / 2.0) * 255.0)
+
+class ButterfliesDataset(Dataset):
+    def __init__(self, transform=None):
+        self.transform = transform
+        dataset_path = "huggan/smithsonian_butterflies_subset"
+        self.raw_dataset = load_dataset(dataset_path, split="train")
+        
+        # Ensure images are properly loaded
+        self.raw_dataset = self.raw_dataset.cast_column("image", features.Image())
+
+    def __len__(self):
+        return len(self.raw_dataset)
+
+    def __getitem__(self, idx):
+        image = self.raw_dataset[idx]["image"]  # Get PIL Image
+        
+        if self.transform:
+            image = self.transform(image)  # Apply transformations
+
+        return image
