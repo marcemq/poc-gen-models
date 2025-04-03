@@ -3,8 +3,8 @@ import logging
 import sys
 import torch
 import tqdm
-from utils.data import Checkerboard
-from models.flow_matching import MLP
+from utils.data import CheckerboardDataset
+from models.MLP import MLP
 from utils.utils import create_directory
 from utils.plot import plot_checkerboard_over_time
 
@@ -57,5 +57,5 @@ if __name__ == '__main__':
     parser.add_argument('--plot_steps', type=int, default=20, help='Var to tell plot sampling every certain steps')
     args = parser.parse_args()
 
-    cboard = Checkerboard(N=args.N, x_min=args.x_min, x_max=args.x_max, y_min=args.y_min, y_max=args.y_max, length=args.length)
+    cboard = CheckerboardDataset(N=args.N, x_min=args.x_min, x_max=args.x_max, y_min=args.y_min, y_max=args.y_max, length=args.length)
     sampling(cboard, args.plot_steps)

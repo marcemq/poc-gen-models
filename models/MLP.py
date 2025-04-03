@@ -23,7 +23,7 @@ class MLP(nn.Module):
         self.out_projection = nn.Linear(channels, channels_data)
 
     def gen_t_embedding(self, t, max_positions=10000):
-        t = t * max_positions
+        #t = t * max_positions
         half_dim = self.channels_t // 2
         emb = math.log(max_positions) / (half_dim - 1)
         emb = torch.arange(half_dim, device=t.device).float().mul(-emb).exp()

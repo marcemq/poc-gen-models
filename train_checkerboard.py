@@ -6,8 +6,8 @@ import torch
 import tqdm
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
-from utils.data import Checkerboard
-from models.flow_matching import MLP
+from utils.data import CheckerboardDataset
+from models.MLP import MLP
 from utils.utils import create_directory
 from utils.plot import plot_checkerboard
 
@@ -66,5 +66,5 @@ if __name__ == '__main__':
     parser.add_argument('--length', type=int, default=4, help='Length of checkboard pattern')
     args = parser.parse_args()
 
-    cboard = Checkerboard(N=args.N, x_min=args.x_min, x_max=args.x_max, y_min=args.y_min, y_max=args.y_max, length=args.length)
+    cboard = CheckerboardDataset(N=args.N, x_min=args.x_min, x_max=args.x_max, y_min=args.y_min, y_max=args.y_max, length=args.length)
     train(cboard)

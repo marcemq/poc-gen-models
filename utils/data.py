@@ -7,8 +7,8 @@ from torchvision import transforms
 from datasets import features
 import torch
 
-class Checkerboard(object):
-    def __init__(self, N=1000, x_min=-4, x_max=4, y_min=-4, y_max=4, length=4):
+class CheckerboardDataset(Dataset):
+    def __init__(self, cfg_ds):
         """
         Args:
             N: Number of points to sample
@@ -16,12 +16,12 @@ class Checkerboard(object):
             y_min and y_max: min and max values over y axis
             length: length of checkboard pattern
         """
-        self.N = N
-        self.x_min = x_min
-        self.x_max = x_max
-        self.y_min = y_min
-        self.y_max = y_max
-        self.length = length
+        self.N = cfg_ds.N
+        self.x_min = cfg_ds.X_MIN
+        self.x_max = cfg_ds.X_MAX
+        self.y_min = cfg_ds.Y_MIN
+        self.y_max = cfg_ds.Y_MAX
+        self.length = cfg_ds.LENGTH
         # Checkerboard pattern
         self.checkerboard_pattern = np.indices((self.length, self.length)).sum(axis=0) % 2
         self.sampled_points = self._sample_checkerboard_data()
@@ -49,6 +49,12 @@ class Checkerboard(object):
         sampled_points = np.array(sampled_points)
         logging.info(f'Sampled points shape:{sampled_points.shape}')
         return sampled_points
+
+    def __len__(self):
+        return len(self.sampled_points)
+
+    def __getitem__(self, idx):
+        return torch.tensor(self.sampled_points[idx])
     
 class CustomTransform:
     def __init__(self):
