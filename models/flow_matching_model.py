@@ -32,6 +32,7 @@ def train(cfg, model, batched_train_data):
             optim.step()
             optim.zero_grad()
 
+            pbar.update(1)
             pbar.set_postfix(loss=loss.item())
             losses.append(loss.item())
 
