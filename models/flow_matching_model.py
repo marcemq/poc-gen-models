@@ -39,7 +39,7 @@ def train(cfg, model, batched_train_data):
     torch.save({
     'model_state_dict': model.state_dict(),
     'optimizer_state_dict': optim.state_dict()
-    }, f'{cfg.MODEL.SAVE_DIR}/{cfg.MODEL.MODEL_NAME}')
+    }, f'{cfg.MODEL.MODEL_SAVE_DIR}/{cfg.MODEL.MODEL_NAME}')
 
     logging.info(f"Done training! \n Trained moded saved at {cfg.MODEL.MODEL_SAVE_DIR} dir")
 
@@ -50,7 +50,7 @@ def sampling(cfg, trained_fm_model, plot_func, *args):
     # Setting the device to work with
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    checkpoint = torch.load(f'{cfg.MODEL.SAVE_DIR}/{cfg.MODEL.MODEL_NAME}', map_location=torch.device('cpu'))
+    checkpoint = torch.load(f'{cfg.MODEL.MODEL_SAVE_DIR}/{cfg.MODEL.MODEL_NAME}', map_location=torch.device('cpu'))
     trained_fm_model.load_state_dict(checkpoint['model_state_dict'])
     trained_fm_model.to(device)
     trained_fm_model.eval().requires_grad_(False)
