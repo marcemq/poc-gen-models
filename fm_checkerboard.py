@@ -33,4 +33,4 @@ if __name__ == '__main__':
         batched_cboard_data = DataLoader(cboard_data, batch_size=cfg.DATASET.BATCH_SIZE, **cfg.DATASET.params)
         train(cfg, model, batched_cboard_data)
     elif args.task == "SAMPLING":
-        sampling(cfg, model, plot_checkerboard_over_time, **cboard_data)
+        sampling(cfg, model, plot_checkerboard_over_time, cboard_data)

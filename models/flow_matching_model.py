@@ -43,7 +43,7 @@ def train(cfg, model, batched_train_data):
 
     logging.info(f"Done training! \n Trained moded saved at {cfg.MODEL.MODEL_SAVE_DIR} dir")
 
-def sampling(cfg, trained_fm_model, plot_func):
+def sampling(cfg, trained_fm_model, plot_func, *args):
     logging.info("Init Sampling ...")
     create_directory(cfg.MODEL.OUTPUT_DIR)
     torch.manual_seed(42)
@@ -70,4 +70,4 @@ def sampling(cfg, trained_fm_model, plot_func):
     pbar.close()
     logging.info('Done sampling')
 
-    plot_func(xt_over_time, cboard)
+    plot_func(xt_over_time, *args)
