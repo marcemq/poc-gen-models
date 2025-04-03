@@ -3,7 +3,7 @@ import logging
 import sys
 import torch
 import tqdm
-from models.unet import UNet
+from models.UNet import UNet
 from torch.utils.data import DataLoader
 from utils.utils import create_directory
 from utils.plot import plot_butterflies_over_time

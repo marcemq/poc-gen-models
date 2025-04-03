@@ -8,7 +8,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
 from torch.utils.data import DataLoader
 from utils.data import ButterfliesDataset, CustomTransform
-from models.unet import UNet
+from models.UNet import UNet
 from utils.utils import create_directory
 
 
