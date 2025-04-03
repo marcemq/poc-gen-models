@@ -11,7 +11,7 @@ def train(cfg, model, batched_train_data):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model.to(device)
-    optim = torch.optim.AdamW(model.parameters(), lr=1e-4)
+    optim = torch.optim.AdamW(model.parameters(), lr=cfg.TRAIN.LR)
 
     num_batches = len(batched_train_data)
     total_steps = cfg.TRAIN.EPOCHS * num_batches  # Total training steps
@@ -22,8 +22,12 @@ def train(cfg, model, batched_train_data):
             x1 = batch.to(device).float()
             x0 = torch.randn_like(x1, device=device)
             target = x1 - x0
+
             t = torch.rand(x1.size(0), device=device)
-            xt = (1 - t[:, None]) * x0 + t[:, None] * x1
+            if x1.dim() > 2:
+                t = t.view(-1, 1, 1, 1)
+
+            xt = (1 - t) * x0 + t * x1
 
             pred = model(xt, (t*cfg.MODEL.TIME_EMB_MAX_POS).long().view(-1))
             loss = ((target - pred)**2).mean()
@@ -43,7 +47,7 @@ def train(cfg, model, batched_train_data):
 
     logging.info(f"Done training! \n Trained moded saved at {cfg.MODEL.MODEL_SAVE_DIR} dir")
 
-def sampling(cfg, trained_fm_model, plot_func, *args):
+def sampling(cfg, trained_fm_model, xt, plot_func, *args):
     logging.info("Init Sampling ...")
     create_directory(cfg.MODEL.OUTPUT_DIR)
     torch.manual_seed(42)
@@ -54,14 +58,15 @@ def sampling(cfg, trained_fm_model, plot_func, *args):
     trained_fm_model.load_state_dict(checkpoint['model_state_dict'])
     trained_fm_model.to(device)
     trained_fm_model.eval().requires_grad_(False)
+    xt.to(device)
 
-    xt = torch.randn(cfg.SAMPLING.NUM_SAMPLES, 2, device=device)
     steps = cfg.SAMPLING.STEPS
     xt_over_time = []
     xt_over_time.append((0, xt))
     pbar = tqdm.tqdm(range(1, steps + 1), desc="Sampling")
     for i, t in enumerate(torch.linspace(0, 1, steps, device=device), start=1):
-        pred = trained_fm_model(xt, t.expand(xt.size(0)))
+        time_indices = (t * cfg.MODEL.TIME_EMB_MAX_POS).clamp(0, cfg.MODEL.TIME_EMB_MAX_POS-1).long()
+        pred = trained_fm_model(xt, time_indices.expand(xt.size(0)))
         xt = xt + (1 / steps) * pred
         if i % cfg.PLOT.PLOT_STEPS == 0:
             xt_over_time.append((t, xt))

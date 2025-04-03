@@ -57,8 +57,7 @@ class CheckerboardDataset(Dataset):
         return torch.tensor(self.sampled_points[idx])
     
 class CustomTransform:
-    def __init__(self):
-        image_size = 64
+    def __init__(self, image_size):
         self.preprocess = transforms.Compose([
             transforms.Resize((image_size, image_size)),
             transforms.RandomHorizontalFlip(),
