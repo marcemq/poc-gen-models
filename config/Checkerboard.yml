@@ -1,0 +1,30 @@
+DATASET:
+  N: 2000
+  X_MIN: -4
+  X_MAX: 4
+  Y_MIN: -4
+  Y_MAX: 4
+  LENGTH: 4
+  BATCH_SIZE: 256
+  params:
+    shuffle: True
+    num_workers: 6
+MODEL:
+  MODEL_SAVE_DIR: "saved_models"
+  OUTPUT_DIR : "images"
+  MODEL_NAME: "fm_mlp_model.pth"
+  INPUT_CHANNELS: 2
+  LAYERS: 5
+  CHANNELS: 512
+  CHANNELS_T: 512
+  TIME_EMB_MAX_POS: 10000 #should be 1000?
+TRAIN:
+  LR: 0.0001
+  EPOCHS: 1000
+SAMPLING:
+  NUM_SAMPLES: 2000
+  STEPS: 1000
+PLOT:
+  NAME: "checkerboard_over_time.gif"
+  FPS: 5
+  PLOT_STEPS: 20

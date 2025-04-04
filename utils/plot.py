@@ -21,7 +21,7 @@ def plot_checkerboard(cboard, saveImg=True):
     if saveImg:
         fig.savefig("images/checkerboard.png", format='png', bbox_inches='tight')
 
-def plot_checkerboard_over_time(xt_over_time, cboard):
+def plot_checkerboard_over_time(xt_over_time, fps, cboard):
     title =  f"Sampling of checkerboard over time"
     fig, ax = plt.subplots(figsize=(6, 6))
     # Plot checkerboard background
@@ -44,12 +44,12 @@ def plot_checkerboard_over_time(xt_over_time, cboard):
     # Set up animation for the current sequence
     ani = animation.FuncAnimation(fig, update, frames=len(xt_over_time), repeat=True)
     gif_name = "images/checkerboard_over_time.gif"
-    ani.save(gif_name, writer=PillowWriter(fps=5))
+    ani.save(gif_name, writer=PillowWriter(fps=fps))
     plt.close(fig)
 
     logging.info("Checkerboard over time gif saved at images dir")
 
-def plot_butterflies_over_time(xt_over_time):
+def plot_butterflies_over_time(xt_over_time, fps):
     title =  f"Sampling of butterflies over time"
     fig, ax = plt.subplots(figsize=(7, 7))
 
@@ -71,7 +71,7 @@ def plot_butterflies_over_time(xt_over_time):
     # Set up animation for the current sequence
     ani = animation.FuncAnimation(fig, update, frames=len(xt_over_time), repeat=True)
     gif_name = "images/butterflies_over_time.gif"
-    ani.save(gif_name, writer=PillowWriter(fps=5))
+    ani.save(gif_name, writer=PillowWriter(fps=fps))
     plt.close(fig)
 
     logging.info("Butterflies over time gif saved at images dir")
