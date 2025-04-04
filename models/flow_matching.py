@@ -70,7 +70,8 @@ class FM_model:
 
         for i, t in enumerate(torch.linspace(0, 1, steps, device=self.device), start=1):
             time_indices = (t * self.cfg.MODEL.TIME_EMB_MAX_POS).clamp(0, self.cfg.MODEL.TIME_EMB_MAX_POS-1).long()
-            pred = self.model(xt, time_indices.expand(xt.size(0)))
+            time_indices = time_indices.to(self.device).expand(xt.size(0))
+            pred = self.model(xt, time_indices)
             xt = xt + (1 / steps) * pred
             if i % self.cfg.PLOT.PLOT_STEPS == 0:
                 xt_over_time.append((t, xt))
