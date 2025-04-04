@@ -1,6 +1,6 @@
 DATASET:
   IMAGE_SIZE: 64
-  BATCH_SIZE: 32
+  BATCH_SIZE: 64
   params:
     shuffle: True
     num_workers: 6
@@ -19,7 +19,7 @@ MODEL:
   TIME_EMB_MAX_POS: 1000
 TRAIN:
   LR: 0.0001
-  EPOCHS: 5000
+  EPOCHS: 1000
 SAMPLING:
   NUM_SAMPLES: 16
   STEPS: 1000

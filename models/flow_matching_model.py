@@ -58,7 +58,7 @@ def sampling(cfg, trained_fm_model, xt, plot_func, *args):
     trained_fm_model.load_state_dict(checkpoint['model_state_dict'])
     trained_fm_model.to(device)
     trained_fm_model.eval().requires_grad_(False)
-    xt.to(device)
+    xt.to(device).float()
 
     steps = cfg.SAMPLING.STEPS
     xt_over_time = []

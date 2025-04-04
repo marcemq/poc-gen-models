@@ -108,6 +108,9 @@ class UNet(nn.Module):
         )
 
     def forward(self, x, t):
+        """
+        Forward call for UNet
+        """
         # Time embeddings
         time_emb = self.time_embeddings(t)
 
