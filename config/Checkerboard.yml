@@ -5,7 +5,7 @@ DATASET:
   Y_MIN: -4
   Y_MAX: 4
   LENGTH: 4
-  BATCH_SIZE: 128
+  BATCH_SIZE: 256
   params:
     shuffle: True
     num_workers: 6
@@ -19,8 +19,8 @@ MODEL:
   CHANNELS_T: 512
   TIME_EMB_MAX_POS: 10000 #should be 1000?
 TRAIN:
-  LR: 1e-4
-  EPOCHS: 5000
+  LR: 0.0001
+  EPOCHS: 1000
 SAMPLING:
   NUM_SAMPLES: 2000
   STEPS: 1000

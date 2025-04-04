@@ -10,7 +10,7 @@ from models.UNet import UNet
 from utils.plot import plot_butterflies_over_time
 from utils.myparser import getYamlConfig
 from torch.utils.data import DataLoader
-from models.flow_matching_model import train, sampling
+from models.flow_matching_model import FM_model
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
@@ -33,13 +33,14 @@ if __name__ == '__main__':
                       base_channels_multiples = cfg.MODEL.BASE_CH_MULT,
                       apply_attention         = cfg.MODEL.APPLY_ATTENTION,
                       dropout_rate            = cfg.MODEL.DROPOUT_RATE,
-                      time_multiple           = cfg.MODEL.TIME_EMB_MULT,
-                    )
-    bflies_data = ButterfliesDataset(transform=CustomTransform(cfg.DATASET.IMAGE_SIZE))
+                      time_multiple           = cfg.MODEL.TIME_EMB_MULT)
+
+    fm_model = FM_model(cfg, model_unet)
 
     if args.task == "TRAIN":
+        bflies_data = ButterfliesDataset(transform=CustomTransform(cfg.DATASET.IMAGE_SIZE))
         batched_cboard_data = DataLoader(bflies_data, batch_size=cfg.DATASET.BATCH_SIZE, **cfg.DATASET.params)
-        train(cfg, model_unet, batched_cboard_data)
+        fm_model.train(batched_cboard_data)
     elif args.task == "SAMPLING":
         xt = torch.randn((cfg.SAMPLING.NUM_SAMPLES,cfg.MODEL.INPUT_CHANNELS,cfg.DATASET.IMAGE_SIZE,cfg.DATASET.IMAGE_SIZE))
-        sampling(cfg, model_unet, xt, plot_butterflies_over_time)
+        fm_model.sampling(xt, plot_butterflies_over_time)

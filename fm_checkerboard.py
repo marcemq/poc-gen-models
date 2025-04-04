@@ -10,7 +10,7 @@ from models.MLP import MLP
 from utils.plot import plot_checkerboard_over_time
 from utils.myparser import getYamlConfig
 from torch.utils.data import DataLoader
-from models.flow_matching_model import train, sampling
+from models.flow_matching_model import FM_model
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
@@ -29,10 +29,11 @@ if __name__ == '__main__':
     cfg = getYamlConfig(args.config_yml_file)
     model_mlp = MLP(channels_data=cfg.MODEL.INPUT_CHANNELS, layers=cfg.MODEL.LAYERS, channels=cfg.MODEL.CHANNELS, channels_t=cfg.MODEL.CHANNELS_T)
     cboard_data = CheckerboardDataset(cfg_ds=cfg.DATASET)
+    fm_model = FM_model(cfg, model_mlp)
 
     if args.task == "TRAIN":
         batched_cboard_data = DataLoader(cboard_data, batch_size=cfg.DATASET.BATCH_SIZE, **cfg.DATASET.params)
-        train(cfg, model_mlp, batched_cboard_data)
+        fm_model.train(batched_cboard_data)
     elif args.task == "SAMPLING":
         xt = torch.randn((cfg.SAMPLING.NUM_SAMPLES, cfg.MODEL.INPUT_CHANNELS))
-        sampling(cfg, model_mlp, xt, plot_checkerboard_over_time, cboard_data)
+        fm_model.sampling(xt, plot_checkerboard_over_time, cboard_data)

@@ -1,78 +1,81 @@
-import logging
+import logging, os
 import torch
 import tqdm
 from utils.utils import create_directory
 
-def train(cfg, model, batched_train_data):
-    logging.info("Init training ...")
-    create_directory(cfg.MODEL.MODEL_SAVE_DIR)
-    torch.manual_seed(42)
-    # Setting the device to work with
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+class FM_model:
+    def __init__(self, cfg, model):
+        self.cfg = cfg
+        self.model = model
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.optim = torch.optim.AdamW(self.model.parameters(), lr=self.cfg.TRAIN.LR)
+        self.model.to(self.device)
+        torch.manual_seed(42)
 
-    model.to(device)
-    optim = torch.optim.AdamW(model.parameters(), lr=cfg.TRAIN.LR)
+    def train(self, batched_train_data):
+        logging.info("Init training ...")
+        create_directory(self.cfg.MODEL.MODEL_SAVE_DIR)
 
-    num_batches = len(batched_train_data)
-    total_steps = cfg.TRAIN.EPOCHS * num_batches  # Total training steps
-    pbar = tqdm.tqdm(total=total_steps, desc="Training")
-    losses = []
-    for epoch in range(cfg.TRAIN.EPOCHS):
-        for batch in batched_train_data:
-            x1 = batch.to(device).float()
-            x0 = torch.randn_like(x1, device=device)
-            target = x1 - x0
+        num_batches = len(batched_train_data)
+        total_steps = self.cfg.TRAIN.EPOCHS * num_batches
+        pbar = tqdm.tqdm(total=total_steps, desc="Training")
+        losses = []
 
-            t = torch.rand(x1.size(0), device=device)
-            if x1.dim() > 2:
-                t = t.view(-1, 1, 1, 1)
+        for epoch in range(self.cfg.TRAIN.EPOCHS):
+            for batch in batched_train_data:
+                x1 = batch.to(self.device).float()
+                x0 = torch.randn_like(x1, device=self.device)
+                target = x1 - x0
 
-            xt = (1 - t) * x0 + t * x1
+                t = torch.rand(x1.size(0), device=self.device)
+                t = t.view(-1, 1, 1, 1) if x1.dim() > 2 else t.view(-1, 1)
+                
+                xt = (1 - t) * x0 + t * x1
+                pred = self.model(xt, (t * self.cfg.MODEL.TIME_EMB_MAX_POS).long().view(-1))
+                loss = ((target - pred) ** 2).mean()
 
-            pred = model(xt, (t*cfg.MODEL.TIME_EMB_MAX_POS).long().view(-1))
-            loss = ((target - pred)**2).mean()
+                loss.backward()
+                self.optim.step()
+                self.optim.zero_grad()
 
-            loss.backward()
-            optim.step()
-            optim.zero_grad()
+                pbar.update(1)
+                pbar.set_postfix(loss=loss.item())
+                losses.append(loss.item())
+        
+        model_path = f'{self.cfg.MODEL.MODEL_SAVE_DIR}/{self.cfg.MODEL.MODEL_NAME}'
+        torch.save({'model_state_dict': self.model.state_dict(), 'optimizer_state_dict': self.optim.state_dict()}, model_path)
+        logging.info(f"Done training! \n Trained model saved at {self.cfg.MODEL.MODEL_SAVE_DIR}")
 
+    def _load_trained_model(self):
+        model_path = f'{self.cfg.MODEL.MODEL_SAVE_DIR}/{self.cfg.MODEL.MODEL_NAME}'
+    
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model file not found at: {model_path}")
+        
+        checkpoint = torch.load(model_path, map_location='cpu')
+        self.model.load_state_dict(checkpoint['model_state_dict'])
+        self.model.to(self.device)
+        self.model.eval().requires_grad_(False)
+
+    def sampling(self, xt, plot_func, *args):
+        logging.info("Init Sampling ...")
+        create_directory(self.cfg.MODEL.OUTPUT_DIR)
+
+        self._load_trained_model()
+        xt = xt.to(self.device).float()
+
+        steps = self.cfg.SAMPLING.STEPS
+        xt_over_time = [(0, xt)]
+        pbar = tqdm.tqdm(range(1, steps + 1), desc="Sampling")
+        
+        for i, t in enumerate(torch.linspace(0, 1, steps, device=self.device), start=1):
+            time_indices = (t * self.cfg.MODEL.TIME_EMB_MAX_POS).clamp(0, self.cfg.MODEL.TIME_EMB_MAX_POS-1).long()
+            pred = self.model(xt, time_indices.expand(xt.size(0)))
+            xt = xt + (1 / steps) * pred
+            if i % self.cfg.PLOT.PLOT_STEPS == 0:
+                xt_over_time.append((t, xt))
             pbar.update(1)
-            pbar.set_postfix(loss=loss.item())
-            losses.append(loss.item())
-
-    torch.save({
-    'model_state_dict': model.state_dict(),
-    'optimizer_state_dict': optim.state_dict()
-    }, f'{cfg.MODEL.MODEL_SAVE_DIR}/{cfg.MODEL.MODEL_NAME}')
-
-    logging.info(f"Done training! \n Trained moded saved at {cfg.MODEL.MODEL_SAVE_DIR} dir")
-
-def sampling(cfg, trained_fm_model, xt, plot_func, *args):
-    logging.info("Init Sampling ...")
-    create_directory(cfg.MODEL.OUTPUT_DIR)
-    torch.manual_seed(42)
-    # Setting the device to work with
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    checkpoint = torch.load(f'{cfg.MODEL.MODEL_SAVE_DIR}/{cfg.MODEL.MODEL_NAME}', map_location=torch.device('cpu'))
-    trained_fm_model.load_state_dict(checkpoint['model_state_dict'])
-    trained_fm_model.to(device)
-    trained_fm_model.eval().requires_grad_(False)
-    xt.to(device).float()
-
-    steps = cfg.SAMPLING.STEPS
-    xt_over_time = []
-    xt_over_time.append((0, xt))
-    pbar = tqdm.tqdm(range(1, steps + 1), desc="Sampling")
-    for i, t in enumerate(torch.linspace(0, 1, steps, device=device), start=1):
-        time_indices = (t * cfg.MODEL.TIME_EMB_MAX_POS).clamp(0, cfg.MODEL.TIME_EMB_MAX_POS-1).long()
-        pred = trained_fm_model(xt, time_indices.expand(xt.size(0)))
-        xt = xt + (1 / steps) * pred
-        if i % cfg.PLOT.PLOT_STEPS == 0:
-            xt_over_time.append((t, xt))
-        pbar.update(1)
-
-    pbar.close()
-    logging.info('Done sampling')
-
-    plot_func(xt_over_time, *args)
+        
+        pbar.close()
+        logging.info('Done sampling')
+        plot_func(xt_over_time, self.cfg.PLOT.FPS, *args)
