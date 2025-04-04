@@ -10,7 +10,7 @@ from models.MLP import MLP
 from utils.plot import plot_checkerboard_over_time
 from utils.myparser import getYamlConfig
 from torch.utils.data import DataLoader
-from models.flow_matching_model import FM_model
+from models.flow_matching import FM_model
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',

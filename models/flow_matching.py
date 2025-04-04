@@ -29,7 +29,7 @@ class FM_model:
 
                 t = torch.rand(x1.size(0), device=self.device)
                 t = t.view(-1, 1, 1, 1) if x1.dim() > 2 else t.view(-1, 1)
-                
+
                 xt = (1 - t) * x0 + t * x1
                 pred = self.model(xt, (t * self.cfg.MODEL.TIME_EMB_MAX_POS).long().view(-1))
                 loss = ((target - pred) ** 2).mean()
@@ -41,17 +41,17 @@ class FM_model:
                 pbar.update(1)
                 pbar.set_postfix(loss=loss.item())
                 losses.append(loss.item())
-        
+
         model_path = f'{self.cfg.MODEL.MODEL_SAVE_DIR}/{self.cfg.MODEL.MODEL_NAME}'
         torch.save({'model_state_dict': self.model.state_dict(), 'optimizer_state_dict': self.optim.state_dict()}, model_path)
         logging.info(f"Done training! \n Trained model saved at {self.cfg.MODEL.MODEL_SAVE_DIR}")
 
     def _load_trained_model(self):
         model_path = f'{self.cfg.MODEL.MODEL_SAVE_DIR}/{self.cfg.MODEL.MODEL_NAME}'
-    
+
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model file not found at: {model_path}")
-        
+
         checkpoint = torch.load(model_path, map_location='cpu')
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.model.to(self.device)
@@ -67,7 +67,7 @@ class FM_model:
         steps = self.cfg.SAMPLING.STEPS
         xt_over_time = [(0, xt)]
         pbar = tqdm.tqdm(range(1, steps + 1), desc="Sampling")
-        
+
         for i, t in enumerate(torch.linspace(0, 1, steps, device=self.device), start=1):
             time_indices = (t * self.cfg.MODEL.TIME_EMB_MAX_POS).clamp(0, self.cfg.MODEL.TIME_EMB_MAX_POS-1).long()
             pred = self.model(xt, time_indices.expand(xt.size(0)))
@@ -75,7 +75,7 @@ class FM_model:
             if i % self.cfg.PLOT.PLOT_STEPS == 0:
                 xt_over_time.append((t, xt))
             pbar.update(1)
-        
+
         pbar.close()
         logging.info('Done sampling')
         plot_func(xt_over_time, self.cfg.PLOT.FPS, *args)
