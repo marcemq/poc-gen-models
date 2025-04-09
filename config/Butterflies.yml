@@ -16,7 +16,8 @@ MODEL:
   APPLY_ATTENTION: [False, True, True, False]
   DROPOUT_RATE: 0.1
   TIME_EMB_MULT: 4 # 128
-  TIME_EMB_MAX_POS: 1000
+  TIME_EMB_MAX_POS: 1000    #For UNet this variable match  total_time_steps
+  TIME_EMB_MAX_FREC: 10000
 TRAIN:
   LR: 0.0001
   EPOCHS: 1000

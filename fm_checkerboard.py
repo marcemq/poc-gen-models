@@ -27,7 +27,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     cfg = getYamlConfig(args.config_yml_file)
-    model_mlp = MLP(channels_data=cfg.MODEL.INPUT_CHANNELS, layers=cfg.MODEL.LAYERS, channels=cfg.MODEL.CHANNELS, channels_t=cfg.MODEL.CHANNELS_T)
+    model_mlp = MLP(channels_data=cfg.MODEL.INPUT_CHANNELS, layers=cfg.MODEL.LAYERS, channels=cfg.MODEL.CHANNELS, channels_t=cfg.MODEL.CHANNELS_T, max_frec=cfg.MODEL.TIME_EMB_MAX_FREC)
     cboard_data = CheckerboardDataset(cfg_ds=cfg.DATASET)
     fm_model = FM_model(cfg, model_mlp)
 

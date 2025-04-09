@@ -33,7 +33,10 @@ if __name__ == '__main__':
                       base_channels_multiples = cfg.MODEL.BASE_CH_MULT,
                       apply_attention         = cfg.MODEL.APPLY_ATTENTION,
                       dropout_rate            = cfg.MODEL.DROPOUT_RATE,
-                      time_multiple           = cfg.MODEL.TIME_EMB_MULT)
+                      time_multiple           = cfg.MODEL.TIME_EMB_MULT,
+                      time_steps              = cfg.MODEL.TIME_EMB_MAX_POS,
+                      time_emb_max_frec       = cfg.MODEL.TIME_EMB_MAX_FREC,
+                      )
 
     fm_model = FM_model(cfg, model_unet)
 

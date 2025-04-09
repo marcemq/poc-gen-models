@@ -16,11 +16,13 @@ class UNet(nn.Module):
         apply_attention=(False, False, True, False),
         dropout_rate   = 0.1,
         time_multiple  = 4,
+        time_steps = 1000,
+        time_emb_max_frec = 10000,
     ):
         super().__init__()
 
         time_emb_dims_exp    = base_channels * time_multiple
-        self.time_embeddings = SinusoidalPositionEmbeddings(time_emb_dims=base_channels, time_emb_dims_exp=time_emb_dims_exp)
+        self.time_embeddings = SinusoidalPositionEmbeddings(total_time_steps=time_steps,time_emb_dims=base_channels, time_emb_dims_exp=time_emb_dims_exp, time_emb_max_frec=time_emb_max_frec)
 
         self.first = nn.Conv2d(in_channels=input_channels, out_channels=base_channels, kernel_size=3, stride=1, padding="same")
 

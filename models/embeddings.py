@@ -4,12 +4,12 @@ import torch.nn as nn
 
 # Positional embedding (for including time information)
 class SinusoidalPositionEmbeddings(nn.Module):
-    def __init__(self, total_time_steps=1000, time_emb_dims=128, time_emb_dims_exp=512):
+    def __init__(self, total_time_steps=1000, time_emb_dims=128, time_emb_dims_exp=512, time_emb_max_frec=10000):
         super().__init__()
 
         half_dim = time_emb_dims // 2
 
-        emb = math.log(10000) / (half_dim - 1)
+        emb = math.log(time_emb_max_frec) / (half_dim - 1)
         # Frequencies
         emb = torch.exp(torch.arange(half_dim, dtype=torch.float32) * -emb)
         # Time steps
