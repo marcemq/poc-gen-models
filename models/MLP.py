@@ -12,7 +12,7 @@ class Block(nn.Module):
         return self.act(self.ff(x))
 
 class MLP(nn.Module):
-    def __init__(self, channels_data=2, layers=5, channels=512, channels_t=512):
+    def __init__(self, channels_data=2, layers=5, channels=512, channels_t=512, max_frec=10000):
         super().__init__()
         self.channels_t = channels_t
         self.in_projection = nn.Linear(channels_data, channels)
@@ -21,11 +21,11 @@ class MLP(nn.Module):
             Block(channels) for _ in range(layers)
         ])
         self.out_projection = nn.Linear(channels, channels_data)
+        self.max_frec = max_frec
 
-    def gen_t_embedding(self, t, max_positions=10000):
-        #t = t * max_positions
+    def gen_t_embedding(self, t):
         half_dim = self.channels_t // 2
-        emb = math.log(max_positions) / (half_dim - 1)
+        emb = math.log(self.max_frec) / (half_dim - 1)
         emb = torch.arange(half_dim, device=t.device).float().mul(-emb).exp()
         emb = t[:, None] * emb[None, :]
         emb = torch.cat([emb.sin(), emb.cos()], dim=1)
