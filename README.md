@@ -2,7 +2,7 @@
 POC of generative models for different datasets.
 
 ## Flow matching for checkerboard dataset
-![Demo Animation](images/checkerboard_over_time.gif)
+<img src="images/checkerboard_over_time.gif" alt="Demo Animation" width="80%">
 
 ## Flow matching for butterflies dataset
-![Demo Animation](images/butterflies_over_time.gif)
+<img src="images/butterflies_over_time.gif" alt="Demo Animation" width="80%">
