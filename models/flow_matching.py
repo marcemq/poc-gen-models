@@ -8,7 +8,7 @@ class FM_model:
         self.cfg = cfg
         self.model = model
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.optim = torch.optim.AdamW(self.model.parameters(), lr=self.GEN_MODEL.FM.TRAIN.LR)
+        self.optim = torch.optim.AdamW(self.model.parameters(), lr=self.cfg.GEN_MODEL.FM.TRAIN.LR)
         self.model.to(self.device)
         torch.manual_seed(42)
 
