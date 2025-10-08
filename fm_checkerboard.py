@@ -16,7 +16,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(messa
                     datefmt='%H:%M:%S',
                     level=logging.INFO,
                     handlers=[
-                        logging.FileHandler("logs/checkerboard.log"),
+                        logging.FileHandler("logs/fm_model_board.log"),
                         logging.StreamHandler(sys.stdout)]
                     )
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     cfg = getYamlConfig(args.config_yml_file)
-    model_mlp = MLP(channels_data=cfg.MODEL.INPUT_CHANNELS, layers=cfg.MODEL.LAYERS, channels=cfg.MODEL.CHANNELS, channels_t=cfg.MODEL.CHANNELS_T, max_frec=cfg.MODEL.TIME_EMB_MAX_FREC)
+    model_mlp = MLP(channels_data=cfg.MLP.INPUT_CHANNELS, layers=cfg.MLP.LAYERS, channels=cfg.MLP.CHANNELS, channels_t=cfg.MLP.CHANNELS_T, max_frec=cfg.MLP.MAX_FREC)
     cboard_data = CheckerboardDataset(cfg_ds=cfg.DATASET)
     fm_model = FM_model(cfg, model_mlp)
 
@@ -35,5 +35,5 @@ if __name__ == '__main__':
         batched_cboard_data = DataLoader(cboard_data, batch_size=cfg.DATASET.BATCH_SIZE, **cfg.DATASET.params)
         fm_model.train(batched_cboard_data)
     elif args.task == "SAMPLING":
-        xt = torch.randn((cfg.SAMPLING.NUM_SAMPLES, cfg.MODEL.INPUT_CHANNELS))
+        xt = torch.randn((cfg.SAMPLING.NUM_SAMPLES, cfg.MLP.INPUT_CHANNELS))
         fm_model.sampling(xt, plot_checkerboard_over_time, cboard_data)
