@@ -17,7 +17,7 @@ class FM_model:
         create_directory(self.cfg.DATA_FS.SAVE_DIR)
 
         num_batches = len(batched_train_data)
-        total_steps = self.cfg.TRAIN.EPOCHS * num_batches
+        total_steps = self.cfg.GEN_MODEL.FM.TRAIN.EPOCHS * num_batches
         pbar = tqdm.tqdm(total=total_steps, desc="Training")
         losses = []
 
