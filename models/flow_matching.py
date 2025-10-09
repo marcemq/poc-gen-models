@@ -52,13 +52,13 @@ class FM_model:
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model file not found at: {model_path}")
 
-        checkpoint = torch.load(model_path, map_location='cpu')
+        checkpoint = torch.load(model_path, map_location='cpu', weights_only=True)
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.model.to(self.device)
         self.model.eval().requires_grad_(False)
 
     def sampling(self, xt, plot_func, *args):
-        model_prefix = self.cfg.PLOT.NAME.split("_")[0]
+        model_prefix = self.cfg.GEN_MODEL.FM.NAME.split("_")[0]
         logging.info("Init Sampling ...")
         create_directory(self.cfg.DATA_FS.OUTPUT_DIR)
 
