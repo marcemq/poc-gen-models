@@ -1,4 +1,4 @@
-import logging
+import logging, os
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.animation import PillowWriter
@@ -21,8 +21,8 @@ def plot_checkerboard(cboard, saveImg=True):
     if saveImg:
         fig.savefig("images/checkerboard.png", format='png', bbox_inches='tight')
 
-def plot_checkerboard_over_time(xt_over_time, fps, cboard):
-    title =  f"Sampling of checkerboard over time"
+def plot_checkerboard_over_time(xt_over_time, model_prefix, output_dir, plot_name, plot_fps, cboard):
+    title =  f"Sampling of checkerboard over time with {model_prefix.upper()} model."
     fig, ax = plt.subplots(figsize=(6, 6))
     # Plot checkerboard background
     ax.imshow(cboard.checkerboard_pattern, extent=(cboard.x_min, cboard.x_max, cboard.y_min, cboard.y_max), origin="lower", cmap=ListedColormap(["purple", "yellow"]))
@@ -43,14 +43,16 @@ def plot_checkerboard_over_time(xt_over_time, fps, cboard):
 
     # Set up animation for the current sequence
     ani = animation.FuncAnimation(fig, update, frames=len(xt_over_time), repeat=True)
-    gif_name = "images/checkerboard_over_time.gif"
-    ani.save(gif_name, writer=PillowWriter(fps=fps))
+
+    # Saving output
+    gif_name = os.path.join(output_dir, plot_name.format(model_prefix))
+    ani.save(gif_name, writer=PillowWriter(fps=plot_fps))
     plt.close(fig)
 
     logging.info("Checkerboard over time gif saved at images dir")
 
-def plot_butterflies_over_time(xt_over_time, fps):
-    title =  f"Sampling of butterflies over time"
+def plot_butterflies_over_time(xt_over_time, model_prefix, output_dir, plot_name, plot_fps):
+    title =  f"Sampling of butterflies over time with {model_prefix.upper()} model."
     fig, ax = plt.subplots(figsize=(7, 7))
 
     # Apply inverse transform to each (t, xt) tuple
@@ -70,8 +72,10 @@ def plot_butterflies_over_time(xt_over_time, fps):
 
     # Set up animation for the current sequence
     ani = animation.FuncAnimation(fig, update, frames=len(xt_over_time), repeat=True)
-    gif_name = "images/butterflies_over_time.gif"
-    ani.save(gif_name, writer=PillowWriter(fps=fps))
+
+    # Saving output gif
+    gif_name = os.path.join(output_dir, plot_name.format(model_prefix))
+    ani.save(gif_name, writer=PillowWriter(fps=plot_fps))
     plt.close(fig)
 
     logging.info("Butterflies over time gif saved at images dir")

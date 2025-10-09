@@ -1,3 +1,6 @@
+DATA_FS:
+  SAVE_DIR: "saved_models/"
+  OUTPUT_DIR : "output_cboard/"
 DATASET:
   N: 2000
   X_MIN: -4
@@ -9,23 +12,25 @@ DATASET:
   params:
     shuffle: True
     num_workers: 6
-MODEL:
-  MODEL_SAVE_DIR: "saved_models"
-  OUTPUT_DIR : "images"
-  MODEL_NAME: "fm_mlp_model.pth"
+GEN_MODEL:
+  FM:
+    NAME: "fm_model_cboard.pth"
+    TIME_MAX_POS: 10000
+    TRAIN:
+      LR: 0.0001
+      EPOCHS: 1000
+  DDPM:
+    NAME: "ddpm_model_cboard.pth"
+MLP:
   INPUT_CHANNELS: 2
   LAYERS: 5
   CHANNELS: 512
   CHANNELS_T: 512
-  TIME_EMB_MAX_POS: 10000
-  TIME_EMB_MAX_FREC: 10000
-TRAIN:
-  LR: 0.0001
-  EPOCHS: 1000
+  MAX_FREC: 10000
 SAMPLING:
   NUM_SAMPLES: 2000
   STEPS: 1000
 PLOT:
-  NAME: "checkerboard_over_time.gif"
+  NAME: "cboard_over_time_{}.gif"
   FPS: 5
   PLOT_STEPS: 20

@@ -1,13 +1,22 @@
+DATA_FS:
+  SAVE_DIR: "saved_models/"
+  OUTPUT_DIR : "output_bflies/"
 DATASET:
   IMAGE_SIZE: 64
   BATCH_SIZE: 64
   params:
     shuffle: True
     num_workers: 6
-MODEL:
-  MODEL_SAVE_DIR: "saved_models"
-  OUTPUT_DIR : "images"
-  MODEL_NAME: "fm_unet_model.pth"
+GEN_MODEL:
+  FM:
+    NAME: "fm_model_bflies.pth"
+    TIME_MAX_POS: 1000    #For UNet this variable match  TOTAL_TIME_STEPS
+    TRAIN:
+      LR: 0.0001
+      EPOCHS: 1000
+  DDPM:
+    NAME: "ddpm_model_bflies.pth"
+UNET:
   NUM_RES_BLOCKS: 1
   INPUT_CHANNELS: 3
   OUTPUT_CHANNELS: 3
@@ -16,15 +25,12 @@ MODEL:
   APPLY_ATTENTION: [False, True, True, False]
   DROPOUT_RATE: 0.1
   TIME_EMB_MULT: 4 # 128
-  TIME_EMB_MAX_POS: 1000    #For UNet this variable match  total_time_steps
+  TOTAL_TIME_STEPS: 1000
   TIME_EMB_MAX_FREC: 10000
-TRAIN:
-  LR: 0.0001
-  EPOCHS: 1000
 SAMPLING:
   NUM_SAMPLES: 16
   STEPS: 1000
 PLOT:
-  NAME: "butterflies_over_time.gif"
+  NAME: "bflies_over_time_{}.gif"
   FPS: 5
   PLOT_STEPS: 20

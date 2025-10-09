@@ -16,26 +16,26 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(messa
                     datefmt='%H:%M:%S',
                     level=logging.INFO,
                     handlers=[
-                        logging.FileHandler("logs/butterflies.log"),
+                        logging.FileHandler("logs/fm_model_bflies.log"),
                         logging.StreamHandler(sys.stdout)]
                     )
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="A script to train and samples a|from flow matching model for butterflies data.")
+    parser = argparse.ArgumentParser(description="A script to train and sample a|from flow matching model for butterflies data.")
     parser.add_argument('--config_yml_file', type=str, default='config/Butterflies.yml', help='Configuration YML file for specific dataset.')
     parser.add_argument('--task', type=str, default='TRAIN', help='Task to perform: TRAIN | SAMPLING')
     args = parser.parse_args()
 
     cfg = getYamlConfig(args.config_yml_file)
-    model_unet = UNet(input_channels = cfg.MODEL.INPUT_CHANNELS,
-                      output_channels= cfg.MODEL.OUTPUT_CHANNELS,
-                      base_channels           = cfg.MODEL.BASE_CH,
-                      base_channels_multiples = cfg.MODEL.BASE_CH_MULT,
-                      apply_attention         = cfg.MODEL.APPLY_ATTENTION,
-                      dropout_rate            = cfg.MODEL.DROPOUT_RATE,
-                      time_multiple           = cfg.MODEL.TIME_EMB_MULT,
-                      time_steps              = cfg.MODEL.TIME_EMB_MAX_POS,
-                      time_emb_max_frec       = cfg.MODEL.TIME_EMB_MAX_FREC,
+    model_unet = UNet(input_channels = cfg.UNET.INPUT_CHANNELS,
+                      output_channels= cfg.UNET.OUTPUT_CHANNELS,
+                      base_channels           = cfg.UNET.BASE_CH,
+                      base_channels_multiples = cfg.UNET.BASE_CH_MULT,
+                      apply_attention         = cfg.UNET.APPLY_ATTENTION,
+                      dropout_rate            = cfg.UNET.DROPOUT_RATE,
+                      time_multiple           = cfg.UNET.TIME_EMB_MULT,
+                      total_time_steps        = cfg.UNET.TOTAL_TIME_STEPS,
+                      time_emb_max_frec       = cfg.UNET.TIME_EMB_MAX_FREC,
                       )
 
     fm_model = FM_model(cfg, model_unet)
@@ -45,5 +45,5 @@ if __name__ == '__main__':
         batched_cboard_data = DataLoader(bflies_data, batch_size=cfg.DATASET.BATCH_SIZE, **cfg.DATASET.params)
         fm_model.train(batched_cboard_data)
     elif args.task == "SAMPLING":
-        xt = torch.randn((cfg.SAMPLING.NUM_SAMPLES,cfg.MODEL.INPUT_CHANNELS,cfg.DATASET.IMAGE_SIZE,cfg.DATASET.IMAGE_SIZE))
+        xt = torch.randn((cfg.SAMPLING.NUM_SAMPLES,cfg.UNET.INPUT_CHANNELS,cfg.DATASET.IMAGE_SIZE,cfg.DATASET.IMAGE_SIZE))
         fm_model.sampling(xt, plot_butterflies_over_time)
