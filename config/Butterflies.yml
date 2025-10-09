@@ -1,6 +1,6 @@
 DATA_FS:
   SAVE_DIR: "saved_models/"
-  OUTPUT_DIR : "output_bflis/"
+  OUTPUT_DIR : "output_bflies/"
 DATASET:
   IMAGE_SIZE: 64
   BATCH_SIZE: 64

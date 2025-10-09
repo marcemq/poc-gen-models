@@ -1,6 +1,6 @@
 DATA_FS:
   SAVE_DIR: "saved_models/"
-  OUTPUT_DIR : "output_board/"
+  OUTPUT_DIR : "output_cboard/"
 DATASET:
   N: 2000
   X_MIN: -4
@@ -14,13 +14,13 @@ DATASET:
     num_workers: 6
 GEN_MODEL:
   FM:
-    NAME: "fm_model_board.pth"
+    NAME: "fm_model_cboard.pth"
     TIME_MAX_POS: 10000
     TRAIN:
       LR: 0.0001
       EPOCHS: 1000
   DDPM:
-    NAME: "ddpm_model_board.pth"
+    NAME: "ddpm_model_cboard.pth"
 MLP:
   INPUT_CHANNELS: 2
   LAYERS: 5
@@ -31,6 +31,6 @@ SAMPLING:
   NUM_SAMPLES: 2000
   STEPS: 1000
 PLOT:
-  NAME: "board_over_time_{}.gif"
+  NAME: "cboard_over_time_{}.gif"
   FPS: 5
   PLOT_STEPS: 20
