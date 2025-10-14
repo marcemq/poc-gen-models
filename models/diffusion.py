@@ -21,14 +21,14 @@ class DDPM_model:
         self.ddpm_sampler.to(self.device)
         torch.manual_seed(42)
 
-    def train_step(self, batch:torch.Tensor, model:nn.Module, forwardsampler:DDPM):
+    def train_step(self, batch:torch.Tensor, denoiser_model:nn.Module, forwardsampler:DDPM):
         # Sample a timestep uniformly
         t = torch.randint(low=0, high=forwardsampler.timesteps, size=(batch.shape[0],), device=batch.device)
         # Apply forward noising process on original images, up to step t (sample from q(x_t|x_0))
         x_noisy, eps_true = forwardsampler(batch, t)
         with amp.autocast():
             # Our prediction for the denoised image
-            eps_predicted = model(x_noisy, t)
+            eps_predicted = denoiser_model(x_noisy, t)
             # Deduce the loss
             loss          = F.mse_loss(eps_predicted, eps_true)
         return loss
@@ -112,17 +112,16 @@ class DDPM_model:
 
         self.denoiser.eval()
         xt_over_time = [(0, x_T)]
-        pbar = tqdm(range(1, self.ddpm_sampler.timesteps + 1), desc="Sampling")
         # Denoising steps
-        for t in reversed(range(self.ddpm_sampler.timesteps)):
+        for t in tqdm(iterable=reversed(range(0, self.ddpm_sampler.timesteps)),
+                          dynamic_ncols=False,total=self.ddpm_sampler.timesteps,
+                          desc="Sampling :: ", position=0):
             t_tensor = torch.as_tensor(t, dtype=torch.long, device=self.device).reshape(-1).expand(x_T.shape[0])
             eps_pred = self.denoiser(x_T, t_tensor)
             x_T = self.ddpm_sampler.timesteps.step_backward(eps_pred, x_T, t)
             x_T = inverse_transform(x_T).type(torch.uint8)
             if t % self.cfg.PLOT.PLOT_STEPS == 0:
                 xt_over_time.append((t, x_T))
-            pbar.update(1)
 
-        pbar.close()
         logging.info('Done sampling.')
         plot_func(xt_over_time, model_prefix, self.cfg.DATA_FS.OUTPUT_DIR, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)
