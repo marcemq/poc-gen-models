@@ -1,7 +1,8 @@
-import logging, os, tqdm, gc
+import logging, os, gc
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from tqdm import tqdm
 from torch.cuda import amp
 from torchmetrics import MeanMetric
 
