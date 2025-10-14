@@ -8,6 +8,7 @@ DATASET:
     shuffle: True
     num_workers: 6
 GEN_MODEL:
+  MODEL_CHECKPOINT_FREQ: 50
   FM:
     NAME: "fm_model_bflies.pth"
     TIME_MAX_POS: 1000    #For UNet this variable match  TOTAL_TIME_STEPS

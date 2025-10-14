@@ -66,7 +66,6 @@ class DDPM_model:
 
     def train(self, batched_train_dataloader):
         # Loss
-        loss_fn = nn.MSELoss()
         scaler = amp.GradScaler()
 
         logging.info("Init training ...")
@@ -80,16 +79,19 @@ class DDPM_model:
             # Training step
             self.train_one_epoch(self.ddpm_sampler, batched_train_dataloader, scaler, epoch=epoch)
 
-        # Save checkpoint of best model
-        checkpoint_dict = {
-            "opt": self.optimizer.state_dict(),
-            "scaler": scaler.state_dict(),
-            "model": self.denoiser.state_dict()
-        }
-        model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'
-        torch.save(checkpoint_dict, model_path)
-        logging.info(f"DDPM : Done training! \n Trained model saved at {self.cfg.DATA_FS.SAVE_DIR}")
-        del checkpoint_dict
+            # Save checkpoint DDPM model
+            if epoch % self.cfg.GEN_MODEL.MODEL_CHECKPOINT_FREQ == 0:
+                checkpoint_dict = {
+                    "opt": self.optimizer.state_dict(),
+                    "scaler": scaler.state_dict(),
+                    "model": self.denoiser.state_dict()
+                }
+                model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'
+                torch.save(checkpoint_dict, model_path)
+                logging.info(f"DDPM training: checkpoint saved at epoch:{epoch} in {self.cfg.DATA_FS.SAVE_DIR} path.")
+                del checkpoint_dict
+
+        logging.info(f"DDPM: Done training! \n Trained model saved at {self.cfg.DATA_FS.SAVE_DIR}")
 
     def _load_trained_model(self):
         model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'
