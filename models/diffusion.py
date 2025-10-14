@@ -39,7 +39,7 @@ class DDPM_model:
         self.denoiser.train()
 
         with tqdm(total=len(batched_train_dataloader), dynamic_ncols=True) as tq:
-            tq.set_description(f"Train :: Epoch: {epoch}/{self.cfg.GEN_MODEL.DDPM.EPOCHS}")
+            tq.set_description(f"Train :: Epoch: {epoch}/{self.cfg.GEN_MODEL.DDPM.TRAIN.EPOCHS}")
             # Scan the batches
             for batch in batched_train_dataloader:
                 tq.update(1)
