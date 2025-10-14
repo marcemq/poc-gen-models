@@ -112,7 +112,7 @@ class DDPM_model:
 
         self.denoiser.eval()
         xt_over_time = [(0, x_T)]
-        pbar = tqdm.tqdm(range(1, self.ddpm_sampler.timesteps + 1), desc="Sampling")
+        pbar = tqdm(range(1, self.ddpm_sampler.timesteps + 1), desc="Sampling")
         # Denoising steps
         for t in reversed(range(self.ddpm_sampler.timesteps)):
             t_tensor = torch.as_tensor(t, dtype=torch.long, device=self.device).reshape(-1).expand(x_T.shape[0])
