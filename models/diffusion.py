@@ -16,7 +16,7 @@ class DDPM_model:
         self.denoiser = denoiser
         self.ddpm_sampler = DDPM(timesteps = self.cfg.GEN_MODEL.DDPM.TIMESTEPS)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.optim = torch.optim.AdamW(self.denoiser.parameters(), lr=self.cfg.GEN_MODEL.DDPM.TRAIN.LR)
+        self.optimizer = torch.optim.AdamW(self.denoiser.parameters(), lr=self.cfg.GEN_MODEL.DDPM.TRAIN.LR)
         self.denoiser.to(self.device)
         self.ddpm_sampler.to(self.device)
         torch.manual_seed(42)
