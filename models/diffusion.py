@@ -72,7 +72,7 @@ class DDPM_model:
         create_directory(self.cfg.DATA_FS.SAVE_DIR)
 
         # Training loop
-        for epoch in range(1, self.cfg.GEN_MODEL.DDPM.EPOCHS + 1):
+        for epoch in range(1, self.cfg.GEN_MODEL.DDPM.TRAIN.EPOCHS + 1):
             torch.cuda.empty_cache()
             gc.collect()
 
