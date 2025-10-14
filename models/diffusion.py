@@ -118,7 +118,7 @@ class DDPM_model:
                           desc="Sampling :: ", position=0):
             t_tensor = torch.as_tensor(t, dtype=torch.long, device=self.device).reshape(-1).expand(x_T.shape[0])
             eps_pred = self.denoiser(x_T, t_tensor)
-            x_T = self.ddpm_sampler.timesteps.step_backward(eps_pred, x_T, t)
+            x_T = self.ddpm_sampler.step_backward(eps_pred, x_T, t)
             x_T = inverse_transform(x_T).type(torch.uint8)
             if t % self.cfg.PLOT.PLOT_STEPS == 0:
                 xt_over_time.append((t, x_T))
