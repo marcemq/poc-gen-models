@@ -77,7 +77,7 @@ class DDPM_model:
             gc.collect()
 
             # Training step
-            self.train_one_epoch(self.ddpm_sampler, batched_train_dataloader, scaler, loss_fn, epoch=epoch)
+            self.train_one_epoch(self.ddpm_sampler, batched_train_dataloader, scaler, epoch=epoch)
 
         # Save checkpoint of best model
         checkpoint_dict = {
