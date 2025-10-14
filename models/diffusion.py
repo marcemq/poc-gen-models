@@ -111,7 +111,7 @@ class DDPM_model:
         self._load_trained_model()
 
         self.denoiser.eval()
-        xt_over_time = [(0, x_T)]
+        xt_over_time = [(self.ddpm_sampler.timesteps, x_T)]
         # Denoising steps
         for t in tqdm(iterable=reversed(range(0, self.ddpm_sampler.timesteps)),
                           dynamic_ncols=False,total=self.ddpm_sampler.timesteps,
@@ -119,7 +119,6 @@ class DDPM_model:
             t_tensor = torch.as_tensor(t, dtype=torch.long, device=self.device).reshape(-1).expand(x_T.shape[0])
             eps_pred = self.denoiser(x_T, t_tensor)
             x_T = self.ddpm_sampler.step_backward(eps_pred, x_T, t)
-            x_T = inverse_transform(x_T).type(torch.uint8)
             if t % self.cfg.PLOT.PLOT_STEPS == 0:
                 xt_over_time.append((t, x_T))
 
