@@ -88,6 +88,7 @@ class DDPM_model:
         }
         model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'
         torch.save(checkpoint_dict, model_path)
+        logging.info(f"DDPM : Done training! \n Trained model saved at {self.cfg.DATA_FS.SAVE_DIR}")
         del checkpoint_dict
 
     def _load_trained_model(self):
@@ -123,5 +124,5 @@ class DDPM_model:
             pbar.update(1)
 
         pbar.close()
-        logging.info('Done sampling')
+        logging.info('Done sampling.')
         plot_func(xt_over_time, model_prefix, self.cfg.DATA_FS.OUTPUT_DIR, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)
