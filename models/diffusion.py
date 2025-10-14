@@ -111,6 +111,7 @@ class DDPM_model:
         self._load_trained_model()
 
         self.denoiser.eval()
+        x_T = x_T.to(self.device).float()
         xt_over_time = [(self.ddpm_sampler.timesteps, x_T)]
         # Denoising steps
         for t in tqdm(iterable=reversed(range(0, self.ddpm_sampler.timesteps)),
