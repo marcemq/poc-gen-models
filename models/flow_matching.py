@@ -79,5 +79,5 @@ class FM_model:
             pbar.update(1)
 
         pbar.close()
-        logging.info('Done sampling')
+        logging.info('Done sampling.')
         plot_func(xt_over_time, model_prefix, self.cfg.DATA_FS.OUTPUT_DIR, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)
