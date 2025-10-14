@@ -16,7 +16,7 @@ GEN_MODEL:
       EPOCHS: 1000
   DDPM:
     NAME: "ddpm_model_bflies.pth"
-    TIMESTEPS: 1000 
+    TIMESTEPS: 1000
     TRAIN:
       LR: 0.0001
       EPOCHS: 100

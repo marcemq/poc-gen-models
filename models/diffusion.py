@@ -31,7 +31,7 @@ class DDPM_model:
             # Deduce the loss
             loss          = F.mse_loss(eps_predicted, eps_true)
         return loss
-    
+
     def train_one_epoch(self, sampler, batched_train_dataloader, scaler, epoch):
         loss_record = MeanMetric()
         # Set in training mode
