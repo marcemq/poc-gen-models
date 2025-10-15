@@ -3,7 +3,7 @@ DATA_FS:
   OUTPUT_DIR : "output_bflies/"
 DATASET:
   IMAGE_SIZE: 64
-  BATCH_SIZE: 128
+  BATCH_SIZE: 64
   params:
     shuffle: True
     num_workers: 6

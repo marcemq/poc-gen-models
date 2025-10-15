@@ -69,6 +69,7 @@ class DDPM_model:
     def train(self, batched_train_dataloader):
         logging.info("Init training ...")
         create_directory(self.cfg.DATA_FS.SAVE_DIR)
+        create_directory(self.cfg.DATA_FS.OUTPUT_DIR)
 
         epoch_loss = []
         best_loss  = 1e6
