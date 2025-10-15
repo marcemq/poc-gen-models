@@ -7,6 +7,7 @@ from torch.cuda import amp
 from torchmetrics import MeanMetric
 
 from utils.utils import create_directory
+from utils.plot import plot_epoch_loss
 from utils.data import inverse_transform
 from models.ddpm.ddpm import DDPM
 
@@ -69,16 +70,21 @@ class DDPM_model:
         logging.info("Init training ...")
         create_directory(self.cfg.DATA_FS.SAVE_DIR)
 
+        epoch_loss = []
+        best_loss  = 1e6
+
         # Training loop
         for epoch in range(1, self.cfg.GEN_MODEL.DDPM.TRAIN.EPOCHS + 1):
             torch.cuda.empty_cache()
             gc.collect()
 
             # Training step
-            self.train_one_epoch(self.ddpm_sampler, batched_train_dataloader, epoch=epoch)
+            epoch_mean_loss = self.train_one_epoch(self.ddpm_sampler, batched_train_dataloader, epoch=epoch)
+            epoch_loss.append(epoch_mean_loss)
 
             # Save checkpoint DDPM model
-            if epoch % self.cfg.GEN_MODEL.MODEL_CHECKPOINT_FREQ == 0:
+            if epoch_mean_loss < best_loss:
+                best_loss = epoch_mean_loss
                 checkpoint_dict = {
                     "opt": self.optimizer.state_dict(),
                     "scaler": self.scaler.state_dict(),
@@ -86,10 +92,12 @@ class DDPM_model:
                 }
                 model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'
                 torch.save(checkpoint_dict, model_path)
-                logging.info(f"DDPM training: checkpoint saved at epoch:{epoch} in {self.cfg.DATA_FS.SAVE_DIR} path.")
+                logging.info(f"DDPM training: checkpoint saved at epoch:{epoch}")
                 del checkpoint_dict
 
         logging.info(f"DDPM: Done training! \n Trained model saved at {self.cfg.DATA_FS.SAVE_DIR}")
+        model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0]
+        plot_epoch_loss(epoch_loss, self.cfg.DATA_FS.OUTPUT_DIR, model_prefix)
 
     def _load_trained_model(self):
         model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'

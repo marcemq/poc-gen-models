@@ -7,6 +7,22 @@ from utils.utils import create_directory
 from utils.data import inverse_transform
 from torchvision.utils import make_grid
 
+def plot_epoch_loss(epoch_loss, output_dir, model_prefix):
+    """Plot and save the training loss curve over epochs."""
+    plt.figure(figsize=(7, 5))
+    plt.plot(range(1, len(epoch_loss) + 1), epoch_loss, marker='o', linewidth=2)
+    plt.title(f"{model_prefix} Training mean loss per Epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("Mean Epoch Loss")
+    plt.grid(True, linestyle='--', alpha=0.6)
+
+    # Save path
+    plot_path = os.path.join(output_dir, f"{model_prefix}_epoch_loss_curve.png")
+    plt.savefig(plot_path, bbox_inches='tight', dpi=300)
+    plt.close()
+
+    logging.info(f"Epoch loss plot saved at: {plot_path}")
+
 def plot_checkerboard(cboard, saveImg=True):
     create_directory("images")
     # Plot the checkerboard pattern
@@ -49,7 +65,7 @@ def plot_checkerboard_over_time(xt_over_time, model_prefix, output_dir, plot_nam
     ani.save(gif_name, writer=PillowWriter(fps=plot_fps))
     plt.close(fig)
 
-    logging.info("Checkerboard over time gif saved at images dir")
+    logging.info(f"Checkerboard over time gif saved at {output_dir} dir")
 
 def plot_butterflies_over_time(xt_over_time, model_prefix, output_dir, plot_name, plot_fps):
     title =  f"Sampling of butterflies over time with {model_prefix.upper()} model."
@@ -78,4 +94,4 @@ def plot_butterflies_over_time(xt_over_time, model_prefix, output_dir, plot_name
     ani.save(gif_name, writer=PillowWriter(fps=plot_fps))
     plt.close(fig)
 
-    logging.info("Butterflies over time gif saved at images dir")
+    logging.info(f"Butterflies over time gif saved at {output_dir} dir")
