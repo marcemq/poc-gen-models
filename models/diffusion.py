@@ -47,7 +47,7 @@ class DDPM_model:
                 tq.update(1)
                 x = batch.to(self.device).float()
                 # Evaluate loss
-                loss = self.train_step(x, self.denoiser, sampler)
+                loss = self.train_step(x)
 
                 # Backpropagation and update
                 self.optimizer.zero_grad(set_to_none=True)
