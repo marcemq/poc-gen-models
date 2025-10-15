@@ -23,19 +23,19 @@ class DDPM_model:
         self.ddpm_sampler.to(self.device)
         torch.manual_seed(42)
 
-    def train_step(self, batch:torch.Tensor, denoiser_model:nn.Module, forwardsampler:DDPM):
+    def train_step(self, batch:torch.Tensor):
         # Sample a timestep uniformly
-        t = torch.randint(low=0, high=forwardsampler.timesteps, size=(batch.shape[0],), device=batch.device)
+        t = torch.randint(low=0, high=self.ddpm_sampler.timesteps, size=(batch.shape[0],), device=batch.device)
         # Apply forward noising process on original images, up to step t (sample from q(x_t|x_0))
-        x_noisy, eps_true = forwardsampler(batch, t)
+        x_noisy, eps_true = self.ddpm_sampler(batch, t)
         with amp.autocast():
             # Our prediction for the denoised image
-            eps_predicted = denoiser_model(x_noisy, t)
+            eps_predicted = self.denoiser(x_noisy, t)
             # Deduce the loss
             loss          = F.mse_loss(eps_predicted, eps_true)
         return loss
 
-    def train_one_epoch(self, sampler, batched_train_dataloader, epoch):
+    def train_one_epoch(self, batched_train_dataloader, epoch):
         loss_record = MeanMetric()
         # Set in training mode
         self.denoiser.train()
@@ -79,7 +79,7 @@ class DDPM_model:
             gc.collect()
 
             # Training step
-            epoch_mean_loss = self.train_one_epoch(self.ddpm_sampler, batched_train_dataloader, epoch=epoch)
+            epoch_mean_loss = self.train_one_epoch(batched_train_dataloader, epoch=epoch)
             epoch_loss.append(epoch_mean_loss)
 
             # Save checkpoint DDPM model

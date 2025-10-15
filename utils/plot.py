@@ -9,8 +9,8 @@ from torchvision.utils import make_grid
 
 def plot_epoch_loss(epoch_loss, output_dir, model_prefix):
     """Plot and save the training loss curve over epochs."""
-    plt.figure(figsize=(7, 5))
-    plt.plot(range(1, len(epoch_loss) + 1), epoch_loss, marker='o', linewidth=2)
+    plt.figure(figsize=(6, 4))
+    plt.plot(range(1, len(epoch_loss) + 1), epoch_loss, marker='o')
     plt.title(f"{model_prefix} Training mean loss per Epoch")
     plt.xlabel("Epoch")
     plt.ylabel("Mean Epoch Loss")
