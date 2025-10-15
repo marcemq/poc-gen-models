@@ -17,6 +17,7 @@ class DDPM_model:
         self.ddpm_sampler = DDPM(timesteps = self.cfg.GEN_MODEL.DDPM.TIMESTEPS)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.optimizer = torch.optim.AdamW(self.denoiser.parameters(), lr=self.cfg.GEN_MODEL.DDPM.TRAIN.LR)
+        self.scaler = amp.GradScaler()
         self.denoiser.to(self.device)
         self.ddpm_sampler.to(self.device)
         torch.manual_seed(42)
@@ -33,7 +34,7 @@ class DDPM_model:
             loss          = F.mse_loss(eps_predicted, eps_true)
         return loss
 
-    def train_one_epoch(self, sampler, batched_train_dataloader, scaler, epoch):
+    def train_one_epoch(self, sampler, batched_train_dataloader, epoch):
         loss_record = MeanMetric()
         # Set in training mode
         self.denoiser.train()
@@ -49,9 +50,9 @@ class DDPM_model:
 
                 # Backpropagation and update
                 self.optimizer.zero_grad(set_to_none=True)
-                scaler.scale(loss).backward()
-                scaler.step(self.optimizer)
-                scaler.update()
+                self.scaler.scale(loss).backward()
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
 
                 loss_value = loss.detach().item()
                 loss_record.update(loss_value)
@@ -65,9 +66,6 @@ class DDPM_model:
         return mean_loss
 
     def train(self, batched_train_dataloader):
-        # Loss
-        scaler = amp.GradScaler()
-
         logging.info("Init training ...")
         create_directory(self.cfg.DATA_FS.SAVE_DIR)
 
@@ -77,13 +75,13 @@ class DDPM_model:
             gc.collect()
 
             # Training step
-            self.train_one_epoch(self.ddpm_sampler, batched_train_dataloader, scaler, epoch=epoch)
+            self.train_one_epoch(self.ddpm_sampler, batched_train_dataloader, epoch=epoch)
 
             # Save checkpoint DDPM model
             if epoch % self.cfg.GEN_MODEL.MODEL_CHECKPOINT_FREQ == 0:
                 checkpoint_dict = {
                     "opt": self.optimizer.state_dict(),
-                    "scaler": scaler.state_dict(),
+                    "scaler": self.scaler.state_dict(),
                     "model": self.denoiser.state_dict()
                 }
                 model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'
