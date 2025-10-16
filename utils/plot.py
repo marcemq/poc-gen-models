@@ -1,4 +1,5 @@
 import logging, os
+import torch
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.animation import PillowWriter
@@ -72,7 +73,7 @@ def plot_butterflies_over_time(xt_over_time, model_prefix, output_dir, plot_name
     fig, ax = plt.subplots(figsize=(7, 7))
 
     # Apply inverse transform to each (t, xt) tuple
-    xt_over_time = [(t, inverse_transform(xt)) for t, xt in xt_over_time]
+    xt_over_time = [(t, inverse_transform(xt).type(torch.uint8)) for t, xt in xt_over_time]
 
     ax.set_title(title, fontsize=15, fontweight='bold')
     ax.set_xticks([])

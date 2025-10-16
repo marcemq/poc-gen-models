@@ -8,7 +8,6 @@ from torchmetrics import MeanMetric
 
 from utils.utils import create_directory
 from utils.plot import plot_epoch_loss
-from utils.data import inverse_transform
 from models.ddpm.ddpm import DDPM
 
 class DDPM_model:
