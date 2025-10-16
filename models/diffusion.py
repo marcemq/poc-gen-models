@@ -21,7 +21,6 @@ class DDPM_model:
         self.scaler = amp.GradScaler()
         self.denoiser.to(self.device)
         self.ddpm_sampler.to(self.device)
-        torch.manual_seed(42)
 
     def train_step(self, batch:torch.Tensor):
         # Sample a timestep uniformly
@@ -70,6 +69,7 @@ class DDPM_model:
         logging.info("Init training ...")
         create_directory(self.cfg.DATA_FS.SAVE_DIR)
         create_directory(self.cfg.DATA_FS.OUTPUT_DIR)
+        torch.manual_seed(42)
 
         epoch_loss = []
         best_loss  = 1e6
