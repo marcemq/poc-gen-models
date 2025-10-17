@@ -10,11 +10,11 @@ class FM_model:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.optim = torch.optim.AdamW(self.model.parameters(), lr=self.cfg.GEN_MODEL.FM.TRAIN.LR)
         self.model.to(self.device)
-        torch.manual_seed(42)
 
     def train(self, batched_train_data):
         logging.info("Init training ...")
         create_directory(self.cfg.DATA_FS.SAVE_DIR)
+        torch.manual_seed(42)
 
         num_batches = len(batched_train_data)
         total_steps = self.cfg.GEN_MODEL.FM.TRAIN.EPOCHS * num_batches

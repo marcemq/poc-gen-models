@@ -52,8 +52,9 @@ if __name__ == '__main__':
         else:
             ddpm_model.train(batched_bflies_data)
     elif args.task == "SAMPLING":
-        xt = torch.randn((cfg.SAMPLING.NUM_SAMPLES,cfg.UNET.INPUT_CHANNELS,cfg.DATASET.IMAGE_SIZE,cfg.DATASET.IMAGE_SIZE))
         if args.model == "FM":
+            xt = torch.randn((cfg.SAMPLING.NUM_SAMPLES,cfg.UNET.INPUT_CHANNELS,cfg.DATASET.IMAGE_SIZE,cfg.DATASET.IMAGE_SIZE))
             fm_model.sampling(xt, plot_butterflies_over_time)
         else:
+            xt = torch.randn((cfg.SAMPLING.NUM_SAMPLES,cfg.UNET.INPUT_CHANNELS,cfg.DATASET.IMAGE_SIZE,cfg.DATASET.IMAGE_SIZE)).clamp(-1, 1)
             ddpm_model.sampling(xt, plot_butterflies_over_time)

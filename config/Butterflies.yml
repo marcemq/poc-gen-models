@@ -8,6 +8,7 @@ DATASET:
     shuffle: True
     num_workers: 6
 GEN_MODEL:
+  MODEL_CHECKPOINT_FREQ: 50
   FM:
     NAME: "fm_model_bflies.pth"
     TIME_MAX_POS: 1000    #For UNet this variable match  TOTAL_TIME_STEPS
@@ -16,10 +17,10 @@ GEN_MODEL:
       EPOCHS: 1000
   DDPM:
     NAME: "ddpm_model_bflies.pth"
-    TIMESTEPS: 1000
+    TIMESTEPS: 1000 # Define number of diffusion timesteps
     TRAIN:
       LR: 0.0001
-      EPOCHS: 100
+      EPOCHS: 500
 UNET:
   NUM_RES_BLOCKS: 1
   INPUT_CHANNELS: 3
