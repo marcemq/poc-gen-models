@@ -62,6 +62,7 @@ class CustomTransform:
             transforms.Resize((image_size, image_size)),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
+            # Normalize the color values in the range [-1,1]
             transforms.Normalize([0.5], [0.5]),
         ])
 
