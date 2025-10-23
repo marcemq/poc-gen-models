@@ -145,7 +145,7 @@ class DDPM_model:
         self._load_trained_model()
         self.denoiser.eval()
 
-        taus = np.arange(0, self.cfg.GEN_MODEL.DDPM.TIMESTEPS, self.GEN_MODEL.DDPM.DDIM_SAMPLING.TAU_STEP)
+        taus = np.arange(0, self.cfg.GEN_MODEL.DDPM.TIMESTEPS, self.cfg.GEN_MODEL.DDPM.DDIM_SAMPLING.TAU_STEP)
         x_T = x_T.to(self.device).float()
         xt_over_time = [(len(taus), x_T)]
         # Denoising steps
