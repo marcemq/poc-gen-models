@@ -138,7 +138,7 @@ class DDPM_model:
 
     @torch.inference_mode()
     def sampling_ddim(self, x_T, plot_func, *args):
-        model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0]+"ddim"
+        model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0]+"_ddim"
         logging.info("Init DDIM Sampling ...")
         create_directory(self.cfg.DATA_FS.OUTPUT_DIR)
 
