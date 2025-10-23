@@ -149,7 +149,7 @@ class DDPM_model:
         x_T = x_T.to(self.device).float()
         xt_over_time = [(len(taus), x_T)]
         # Denoising steps
-        last_t                     = torch.ones(self.cfg.SAMPLING.NUM_SAMPLES, dtype=torch.long, device=self.device) * (self.GEN_MODEL.DDPM.TIMESTEPS-1)
+        last_t                     = torch.ones(self.cfg.SAMPLING.NUM_SAMPLES, dtype=torch.long, device=self.device) * (self.cfg.GEN_MODEL.DDPM.TIMESTEPS-1)
         alpha_bar_t                = get_from_idx(self.ddpm_sampler.alpha_bar, last_t)
         sqrt_alpha_bar_t           = get_from_idx(self.ddpm_sampler.sqrt_alpha_bar, last_t)
         sqrt_one_minus_alpha_bar_t = get_from_idx(self.ddpm_sampler.sqrt_one_minus_alpha_bar, last_t)
