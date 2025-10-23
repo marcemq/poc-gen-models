@@ -27,6 +27,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_yml_file', type=str, default='config/Butterflies.yml', help='Configuration YML file for specific dataset.')
     parser.add_argument('--task', type=str, default='TRAIN', help='Task to perform: TRAIN | SAMPLING')
     parser.add_argument('--model', type=str, default='FM', help='Model to use: FM | DDPM')
+    parser.add_argument('--sampling', type=str, default='DDPM', help='SAMPLING scheme for ddpm model to use: DDIM | DDPM')
     args = parser.parse_args()
 
     cfg = getYamlConfig(args.config_yml_file)
@@ -47,6 +48,7 @@ if __name__ == '__main__':
     if args.task == "TRAIN":
         bflies_data = ButterfliesDataset(transform=CustomTransform(cfg.DATASET.IMAGE_SIZE))
         batched_bflies_data = DataLoader(bflies_data, batch_size=cfg.DATASET.BATCH_SIZE, **cfg.DATASET.params)
+
         if args.model == "FM":
             fm_model.train(batched_bflies_data)
         else:
@@ -57,4 +59,7 @@ if __name__ == '__main__':
             fm_model.sampling(xt, plot_butterflies_over_time)
         else:
             xt = torch.randn((cfg.SAMPLING.NUM_SAMPLES,cfg.UNET.INPUT_CHANNELS,cfg.DATASET.IMAGE_SIZE,cfg.DATASET.IMAGE_SIZE)).clamp(-1, 1)
-            ddpm_model.sampling(xt, plot_butterflies_over_time)
+            if args.sampling == "DDPM":
+                ddpm_model.sampling_ddpm(xt, plot_butterflies_over_time)
+            else:
+                ddpm_model.sampling_ddim(xt, plot_butterflies_over_time)

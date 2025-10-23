@@ -2,6 +2,7 @@ import logging, os, gc
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 from tqdm import tqdm
 from torch.cuda import amp
 from torchmetrics import MeanMetric
@@ -9,6 +10,7 @@ from torchmetrics import MeanMetric
 from utils.utils import create_directory
 from utils.plot import plot_epoch_loss
 from models.ddpm.ddpm import DDPM
+from models.ddpm.forward import get_from_idx
 
 class DDPM_model:
     def __init__(self, cfg, denoiser):
@@ -111,9 +113,9 @@ class DDPM_model:
         self.denoiser.eval().requires_grad_(False)
 
     @torch.inference_mode()
-    def sampling(self, x_T, plot_func, *args):
+    def sampling_ddpm(self, x_T, plot_func, *args):
         model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0]
-        logging.info("Init Sampling ...")
+        logging.info("Init DDPM Sampling ...")
         create_directory(self.cfg.DATA_FS.OUTPUT_DIR)
 
         self._load_trained_model()
@@ -131,5 +133,44 @@ class DDPM_model:
             if t % self.cfg.PLOT.PLOT_STEPS == 0:
                 xt_over_time.append((t, x_T))
 
-        logging.info('Done sampling.')
+        logging.info('Done DDPM sampling.')
+        plot_func(xt_over_time, model_prefix, self.cfg.DATA_FS.OUTPUT_DIR, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)
+
+    @torch.inference_mode()
+    def sampling_ddim(self, x_T, plot_func, *args):
+        model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0]+"ddim"
+        logging.info("Init DDIM Sampling ...")
+        create_directory(self.cfg.DATA_FS.OUTPUT_DIR)
+
+        self._load_trained_model()
+        self.denoiser.eval()
+
+        taus = np.arange(0, self.cfg.GEN_MODEL.DDPM.TIMESTEPS, self.GEN_MODEL.DDPM.DDIM_SAMPLING.TAU_STEP)
+        x_T = x_T.to(self.device).float()
+        xt_over_time = [(len(taus), x_T)]
+        # Denoising steps
+        last_t                     = torch.ones(self.cfg.SAMPLING.NUM_SAMPLES, dtype=torch.long, device=self.device) * (self.GEN_MODEL.DDPM.TIMESTEPS-1)
+        alpha_bar_t                = get_from_idx(self.ddpm_sampler.alpha_bar, last_t)
+        sqrt_alpha_bar_t           = get_from_idx(self.ddpm_sampler.sqrt_alpha_bar, last_t)
+        sqrt_one_minus_alpha_bar_t = get_from_idx(self.ddpm_sampler.sqrt_one_minus_alpha_bar, last_t)
+        # Now, to reverse the diffusion process, use a sequence of denoising steps
+        for t in tqdm(iterable=reversed(taus), dynamic_ncols=False,total=len(taus), desc="Sampling :: ", position=0):
+            # Time vectors
+            ts = torch.ones(self.cfg.SAMPLING.NUM_SAMPLES, dtype=torch.long, device=self.device) * t
+            # Estimate the noise
+            predicted_noise = self.denoiser(x_T, ts)
+            # The betas, alphas etc.
+            alpha_bar_t_prev                = get_from_idx(self.ddpm_sampler.alpha_bar, ts)
+            sqrt_alpha_bar_t_prev           = get_from_idx(self.ddpm_sampler.sqrt_alpha_bar, ts)
+            sqrt_one_minus_alpha_bar_t_prev = get_from_idx(self.ddpm_sampler.sqrt_one_minus_alpha_bar, ts)
+            # Predicted x0
+            predicted_x0                    = (x_T - sqrt_one_minus_alpha_bar_t*predicted_noise)/sqrt_alpha_bar_t
+            # Generating images for t-1 (deterministic way)
+            x_T = sqrt_alpha_bar_t_prev * predicted_x0 + sqrt_one_minus_alpha_bar_t_prev * predicted_noise
+            alpha_bar_t                     = alpha_bar_t_prev
+            sqrt_alpha_bar_t                = sqrt_alpha_bar_t_prev
+            sqrt_one_minus_alpha_bar_t      = sqrt_one_minus_alpha_bar_t_prev
+            xt_over_time.append((t, x_T))
+
+        logging.info('Done DDIM sampling.')
         plot_func(xt_over_time, model_prefix, self.cfg.DATA_FS.OUTPUT_DIR, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)
