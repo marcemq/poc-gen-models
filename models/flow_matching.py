@@ -9,8 +9,8 @@ class FM_model:
         self.backbone = backbone
         self.backbone_name = backbone_name
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.optim = torch.optim.AdamW(self.model.parameters(), lr=self.cfg.GEN_MODEL.FM.TRAIN.LR)
-        self.model.to(self.device)
+        self.optim = torch.optim.AdamW(self.backbone.parameters(), lr=self.cfg.GEN_MODEL.FM.TRAIN.LR)
+        self.backbone.to(self.device)
 
     def train(self, batched_train_data):
         logging.info("Init training ...")
@@ -32,7 +32,7 @@ class FM_model:
                 t = t.view(-1, 1, 1, 1) if x1.dim() > 2 else t.view(-1, 1)
 
                 xt = (1 - t) * x0 + t * x1
-                pred = self.model(xt, (t * self.cfg.GEN_MODEL.FM.TIME_MAX_POS).long().view(-1))
+                pred = self.backbone(xt, (t * self.cfg.GEN_MODEL.FM.TIME_MAX_POS).long().view(-1))
                 loss = ((target - pred) ** 2).mean()
 
                 loss.backward()
@@ -44,7 +44,7 @@ class FM_model:
                 losses.append(loss.item())
 
         model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.FM.NAME.format(self.backbone_name)}'
-        torch.save({'model_state_dict': self.model.state_dict(), 'optimizer_state_dict': self.optim.state_dict()}, model_path)
+        torch.save({'model_state_dict': self.backbone.state_dict(), 'optimizer_state_dict': self.optim.state_dict()}, model_path)
         logging.info(f"FM : Done training! \n Trained model saved at {self.cfg.DATA_FS.SAVE_DIR}")
 
     def _load_trained_model(self):
@@ -54,9 +54,9 @@ class FM_model:
             raise FileNotFoundError(f"Model file not found at: {model_path}")
 
         checkpoint = torch.load(model_path, map_location='cpu', weights_only=True)
-        self.model.load_state_dict(checkpoint['model_state_dict'])
-        self.model.to(self.device)
-        self.model.eval().requires_grad_(False)
+        self.backbone.load_state_dict(checkpoint['model_state_dict'])
+        self.backbone.to(self.device)
+        self.backbone.eval().requires_grad_(False)
 
     def sampling(self, xt, plot_func, *args):
         model_prefix = self.cfg.GEN_MODEL.FM.NAME.split("_")[0]
@@ -74,7 +74,7 @@ class FM_model:
         for i, t in enumerate(torch.linspace(0, 1, steps, device=self.device), start=1):
             time_indices = (t * self.cfg.GEN_MODEL.FM.TIME_MAX_POS).clamp(0, self.cfg.GEN_MODEL.FM.TIME_MAX_POS-1).long()
             time_indices = time_indices.to(self.device).expand(xt.size(0))
-            pred = self.model(xt, time_indices)
+            pred = self.backbone(xt, time_indices)
             xt = xt + (1 / steps) * pred
             if i % self.cfg.PLOT.PLOT_STEPS == 0:
                 xt_over_time.append((t, xt))
