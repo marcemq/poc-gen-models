@@ -39,7 +39,7 @@ def build_unet(cfg):
 def build_dit(cfg):
     return DiT(
         input_channels    = cfg.DIT.INPUT_CHANNELS,
-        output_channels   = cfg.DiT.OUTPUT_CHANNELS,
+        output_channels   = cfg.DIT.OUTPUT_CHANNELS,
         img_size          = cfg.DATASET.IMAGE_SIZE,
         patch_size        = cfg.DIT.PATCH_SIZE,
         hidden_size       = cfg.DIT.HIDDEN_SIZE,
