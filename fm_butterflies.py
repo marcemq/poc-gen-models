@@ -47,7 +47,7 @@ def build_dit(cfg):
         num_heads         = cfg.DIT.NUM_HEADS,
         mlp_ratio         = cfg.DIT.MLP_RATIO,
         dropout_rate      = cfg.DIT.DROPOUT_RATE,
-        time_emb_dim      = cfg.DIT.TIME_EMB_DIM,
+        time_multiple      = cfg.DIT.TIME_EMB_MULT,
         time_emb_max_frec = cfg.DIT.TIME_EMB_MAX_FREC,
         total_time_steps  = cfg.DIT.TOTAL_TIME_STEPS,
     )
