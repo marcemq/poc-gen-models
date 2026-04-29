@@ -17,16 +17,21 @@ class PatchEmbed(nn.Module):
 
 class PatchUnEmbed(nn.Module):
     def __init__(self, img_size, patch_size, out_channels, hidden_size):
+        """
+        Reassemble (B, N, C*p*p) token sequence → (B, C, H, W) image.
+ 
+        No linear projection here — FinalLayer has already projected from
+        hidden_size to C*p*p. This module only does the spatial reshape.
+        """
         super().__init__()
         self.patch_size   = patch_size
         self.h_patches    = img_size // patch_size
         self.out_channels = out_channels
-        self.proj = nn.Linear(hidden_size, out_channels * patch_size * patch_size)
 
     def forward(self, x):
+        # x: (B, N, C*p*p)  — already projected by FinalLayer
         B = x.shape[0]
         p, h, C = self.patch_size, self.h_patches, self.out_channels
-        x = self.proj(x)
         x = x.reshape(B, h, h, C, p, p)
         x = x.permute(0, 3, 1, 4, 2, 5)
         return x.reshape(B, C, h * p, h * p)

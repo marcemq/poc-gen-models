@@ -18,7 +18,7 @@ class DDPM_model:
         self.ddpm_sampler = DDPM(timesteps = self.cfg.GEN_MODEL.DDPM.TIMESTEPS)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.optimizer = torch.optim.AdamW(self.denoiser.parameters(), lr=self.cfg.GEN_MODEL.DDPM.TRAIN.LR)
-        self.scaler = amp.GradScaler()
+        self.scaler = torch.amp.GradScaler('cuda')
         self.denoiser.to(self.device)
         self.ddpm_sampler.to(self.device)
 
@@ -27,7 +27,7 @@ class DDPM_model:
         t = torch.randint(low=0, high=self.ddpm_sampler.timesteps, size=(batch.shape[0],), device=batch.device)
         # Apply forward noising process on original images, up to step t (sample from q(x_t|x_0))
         x_noisy, eps_true = self.ddpm_sampler(batch, t)
-        with amp.autocast():
+        with torch.amp.autocast('cuda'):
             # Our prediction for the denoised image
             eps_predicted = self.denoiser(x_noisy, t)
             # Deduce the loss
