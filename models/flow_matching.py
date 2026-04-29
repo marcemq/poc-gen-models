@@ -4,9 +4,10 @@ import tqdm
 from utils.utils import create_directory
 
 class FM_model:
-    def __init__(self, cfg, model):
+    def __init__(self, cfg, backbone, backbone_name):
         self.cfg = cfg
-        self.model = model
+        self.backbone = backbone
+        self.backbone_name = backbone_name
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.optim = torch.optim.AdamW(self.model.parameters(), lr=self.cfg.GEN_MODEL.FM.TRAIN.LR)
         self.model.to(self.device)
@@ -42,7 +43,7 @@ class FM_model:
                 pbar.set_postfix(loss=loss.item())
                 losses.append(loss.item())
 
-        model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.FM.NAME}'
+        model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.FM.NAME.format(self.backbone_name)}'
         torch.save({'model_state_dict': self.model.state_dict(), 'optimizer_state_dict': self.optim.state_dict()}, model_path)
         logging.info(f"FM : Done training! \n Trained model saved at {self.cfg.DATA_FS.SAVE_DIR}")
 
@@ -60,7 +61,8 @@ class FM_model:
     def sampling(self, xt, plot_func, *args):
         model_prefix = self.cfg.GEN_MODEL.FM.NAME.split("_")[0]
         logging.info("Init Sampling ...")
-        create_directory(self.cfg.DATA_FS.OUTPUT_DIR)
+        output_dir = f"self.cfg.DATA_FS.OUTPUT_DIR/FM_{self.backbone_name}"
+        create_directory(output_dir)
 
         self._load_trained_model()
         xt = xt.to(self.device).float()
@@ -80,4 +82,4 @@ class FM_model:
 
         pbar.close()
         logging.info('Done sampling.')
-        plot_func(xt_over_time, model_prefix, self.cfg.DATA_FS.OUTPUT_DIR, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)
+        plot_func(xt_over_time, model_prefix, output_dir, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)

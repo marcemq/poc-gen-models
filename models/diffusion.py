@@ -11,9 +11,10 @@ from utils.plot import plot_epoch_loss
 from models.ddpm.ddpm import DDPM
 
 class DDPM_model:
-    def __init__(self, cfg, denoiser):
+    def __init__(self, cfg, denoiser, denoiser_name):
         self.cfg = cfg
         self.denoiser = denoiser
+        self.denoiser_name = denoiser_name
         self.ddpm_sampler = DDPM(timesteps = self.cfg.GEN_MODEL.DDPM.TIMESTEPS)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.optimizer = torch.optim.AdamW(self.denoiser.parameters(), lr=self.cfg.GEN_MODEL.DDPM.TRAIN.LR)
@@ -90,7 +91,7 @@ class DDPM_model:
                     "scaler": self.scaler.state_dict(),
                     "model": self.denoiser.state_dict()
                 }
-                model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'
+                model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME.format(self.denoiser_name)}'
                 torch.save(checkpoint_dict, model_path)
                 logging.info(f"DDPM training: checkpoint saved at epoch:{epoch}")
                 del checkpoint_dict
@@ -114,7 +115,8 @@ class DDPM_model:
     def sampling(self, x_T, plot_func, *args):
         model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0]
         logging.info("Init Sampling ...")
-        create_directory(self.cfg.DATA_FS.OUTPUT_DIR)
+        output_dir = f"self.cfg.DATA_FS.OUTPUT_DIR/DDPM_{self.denoiser_name}"
+        create_directory(output_dir)
 
         self._load_trained_model()
 
@@ -132,4 +134,4 @@ class DDPM_model:
                 xt_over_time.append((t, x_T))
 
         logging.info('Done sampling.')
-        plot_func(xt_over_time, model_prefix, self.cfg.DATA_FS.OUTPUT_DIR, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)
+        plot_func(xt_over_time, model_prefix, output_dir, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)

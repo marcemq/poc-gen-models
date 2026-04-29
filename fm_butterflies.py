@@ -35,8 +35,7 @@ def build_unet(cfg):
         total_time_steps        = cfg.UNET.TOTAL_TIME_STEPS,
         time_emb_max_frec       = cfg.UNET.TIME_EMB_MAX_FREC,
     )
- 
- 
+
 def build_dit(cfg):
     return DiT(
         input_channels    = cfg.DIT.INPUT_CHANNELS,
@@ -59,7 +58,7 @@ if __name__ == '__main__':
     parser.add_argument('--task', type=str, default='TRAIN', help='Task to perform: TRAIN | SAMPLING')
     parser.add_argument('--backbone', type=str, default='UNet', help='Backbone to use: UNet | DiT')
     parser.add_argument('--generative_model', type=str, default='FM', help='Model to use: FM | DDPM')
-    
+
     args = parser.parse_args()
     cfg = getYamlConfig(args.config_yml_file)
     # Build backbone
@@ -73,8 +72,8 @@ if __name__ == '__main__':
     else:
         raise ValueError(f"Unknown backbone '{args.backbone}'. Choose UNET or DiT.")
 
-    fm_model = FM_model(cfg, backbone)
-    ddpm_model = DDPM_model(cfg, backbone)
+    fm_model = FM_model(cfg, backbone, backbone_key)
+    ddpm_model = DDPM_model(cfg, backbone, backbone_key)
     gen_model_key = args.generative_model.upper()
 
     if args.task.upper() == "TRAIN":
@@ -101,4 +100,3 @@ if __name__ == '__main__':
             raise ValueError(f"Unknown generative model '{args.generative_model}'. Choose FM or DDPM.")
     else:
         raise ValueError(f"Unknown task '{args.task}'. Choose TRAIN or SAMPLING.")
- 
