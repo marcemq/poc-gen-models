@@ -97,7 +97,7 @@ class DDPM_model:
                 del checkpoint_dict
 
         logging.info(f"DDPM: Done training! \n Trained model saved at {self.cfg.DATA_FS.SAVE_DIR}")
-        model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0]
+        model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0] +"_"+ self.denoiser_name
         plot_epoch_loss(epoch_loss, self.cfg.DATA_FS.OUTPUT_DIR, model_prefix)
 
     def _load_trained_model(self):
