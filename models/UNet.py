@@ -20,6 +20,8 @@ class UNet(nn.Module):
         time_emb_max_frec = 10000,
     ):
         super().__init__()
+        self.input_channels  = input_channels
+        self.output_channels = output_channels
 
         time_emb_dims_exp    = base_channels * time_multiple
         self.time_embeddings = SinusoidalPositionEmbeddings(total_time_steps=total_time_steps,time_emb_dims=base_channels, time_emb_dims_exp=time_emb_dims_exp, time_emb_max_frec=time_emb_max_frec)

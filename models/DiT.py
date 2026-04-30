@@ -118,6 +118,8 @@ class DiT(nn.Module):
     ):
         super().__init__()
         assert hidden_size % num_heads == 0
+        self.input_channels  = input_channels
+        self.output_channels = output_channels
 
         # time_emb_dims_exp uses the same formula as UNet
         time_emb_dims_exp = hidden_size * time_multiple
