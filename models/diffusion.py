@@ -101,7 +101,7 @@ class DDPM_model:
         plot_epoch_loss(epoch_loss, self.cfg.DATA_FS.OUTPUT_DIR, model_prefix)
 
     def _load_trained_model(self):
-        model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'
+        model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME.format(self.denoiser_name)}'
 
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model file not found at: {model_path}")

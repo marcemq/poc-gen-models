@@ -52,7 +52,7 @@ class FM_model:
         plot_epoch_loss(losses, self.cfg.DATA_FS.OUTPUT_DIR, model_prefix)
 
     def _load_trained_model(self):
-        model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.FM.NAME}'
+        model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.FM.NAME.format(self.backbone_name)}'
 
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model file not found at: {model_path}")
