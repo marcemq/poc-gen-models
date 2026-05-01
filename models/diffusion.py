@@ -115,7 +115,7 @@ class DDPM_model:
     def sampling(self, x_T, plot_func, *args):
         model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0]
         logging.info("Init Sampling ...")
-        output_dir = f"self.cfg.DATA_FS.OUTPUT_DIR/DDPM_{self.denoiser_name}"
+        output_dir = f"{self.cfg.DATA_FS.OUTPUT_DIR}/DDPM_{self.denoiser_name}"
         create_directory(output_dir)
 
         self._load_trained_model()
