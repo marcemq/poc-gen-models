@@ -55,7 +55,7 @@ class FM_model:
         torch.save({'model_state_dict': self.backbone.state_dict(), 'optimizer_state_dict': self.optim.state_dict()}, model_path)
         logging.info(f"FM : Done training! \n Trained model saved at {self.cfg.DATA_FS.SAVE_DIR}")
 
-        model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0] +"_"+ self.backbone_name
+        model_prefix = self.cfg.GEN_MODEL.FM.NAME.split("_")[0] +"_"+ self.backbone_name
         plot_epoch_loss(losses, self.cfg.DATA_FS.OUTPUT_DIR, model_prefix)
 
     def _load_trained_model(self):
