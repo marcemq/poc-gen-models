@@ -10,7 +10,11 @@ class FM_model:
         self.backbone = backbone
         self.backbone_name = backbone_name
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.optim = torch.optim.AdamW(self.backbone.parameters(), lr=self.cfg.GEN_MODEL.FM.TRAIN.LR)
+        backbone_cfg = getattr(self.cfg.GEN_MODEL.FM, backbone_name)
+        self.optim = torch.optim.AdamW(
+            self.backbone.parameters(),
+            lr=backbone_cfg.TRAIN.LR
+        )
         self.backbone.to(self.device)
 
     def train(self, batched_train_data):
@@ -19,11 +23,13 @@ class FM_model:
         torch.manual_seed(42)
 
         num_batches = len(batched_train_data)
-        total_steps = self.cfg.GEN_MODEL.FM.TRAIN.EPOCHS * num_batches
+        backbone_cfg = getattr(self.cfg.GEN_MODEL.FM, self.backbone_name)
+        epochs = backbone_cfg.TRAIN.EPOCHS
+        total_steps = epochs * num_batches
         pbar = tqdm.tqdm(total=total_steps, desc="Training")
         losses = []
 
-        for epoch in range(self.cfg.GEN_MODEL.FM.TRAIN.EPOCHS):
+        for epoch in range(epochs):
             for batch in batched_train_data:
                 x1 = batch.to(self.device).float()
                 x0 = torch.randn_like(x1, device=self.device)

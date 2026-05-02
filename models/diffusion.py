@@ -17,7 +17,11 @@ class DDPM_model:
         self.denoiser_name = denoiser_name
         self.ddpm_sampler = DDPM(timesteps = self.cfg.GEN_MODEL.DDPM.TIMESTEPS)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.optimizer = torch.optim.AdamW(self.denoiser.parameters(), lr=self.cfg.GEN_MODEL.DDPM.TRAIN.LR)
+        denoiser_cfg = getattr(self.cfg.GEN_MODEL.DDPM, self.denoiser_name)
+        self.optim = torch.optim.AdamW(
+            self.backbone.parameters(),
+            lr=denoiser_cfg.TRAIN.LR
+        )
         self.scaler = torch.amp.GradScaler('cuda')
         self.denoiser.to(self.device)
         self.ddpm_sampler.to(self.device)
@@ -38,9 +42,11 @@ class DDPM_model:
         loss_record = MeanMetric()
         # Set in training mode
         self.denoiser.train()
+        denoiser_cfg = getattr(self.cfg.GEN_MODEL.DDPM, self.denoiser_name)
+        epochs = denoiser_cfg.TRAIN.EPOCHS
 
         with tqdm(total=len(batched_train_dataloader), dynamic_ncols=True) as tq:
-            tq.set_description(f"Train :: Epoch: {epoch}/{self.cfg.GEN_MODEL.DDPM.TRAIN.EPOCHS}")
+            tq.set_description(f"Train :: Epoch: {epoch}/{epochs}")
             # Scan the batches
             for batch in batched_train_dataloader:
                 tq.update(1)
@@ -73,9 +79,10 @@ class DDPM_model:
 
         epoch_loss = []
         best_loss  = 1e6
-
+        denoiser_cfg = getattr(self.cfg.GEN_MODEL.DDPM, self.denoiser_name)
+        epochs = denoiser_cfg.TRAIN.EPOCHS
         # Training loop
-        for epoch in range(1, self.cfg.GEN_MODEL.DDPM.TRAIN.EPOCHS + 1):
+        for epoch in range(1, epochs + 1):
             torch.cuda.empty_cache()
             gc.collect()
 
