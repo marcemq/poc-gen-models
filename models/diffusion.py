@@ -19,7 +19,9 @@ class DDPM_model:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         denoiser_cfg = getattr(self.cfg.GEN_MODEL.DDPM, self.denoiser_name)
         self.optim = torch.optim.AdamW(
-            lr=denoiser_cfg.TRAIN.LR
+            self.denoiser.parameters(),
+            lr=denoiser_cfg.TRAIN.LR,
+            weight_decay=denoiser_cfg.TRAIN.WEIGHT_DECAY,
         )
         self.scaler = torch.amp.GradScaler('cuda')
         self.denoiser.to(self.device)

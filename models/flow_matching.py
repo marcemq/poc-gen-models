@@ -12,7 +12,9 @@ class FM_model:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         backbone_cfg = getattr(self.cfg.GEN_MODEL.FM, backbone_name)
         self.optim = torch.optim.AdamW(
-            lr=backbone_cfg.TRAIN.LR
+            params = self.backbone.parameters(),
+            lr=backbone_cfg.TRAIN.LR,
+            weight_decay=backbone_cfg.TRAIN.WEIGHT_DECAY
         )
         self.backbone.to(self.device)
 
