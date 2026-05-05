@@ -11,13 +11,19 @@ from utils.plot import plot_epoch_loss
 from models.ddpm.ddpm import DDPM
 
 class DDPM_model:
-    def __init__(self, cfg, denoiser):
+    def __init__(self, cfg, denoiser, denoiser_name):
         self.cfg = cfg
         self.denoiser = denoiser
+        self.denoiser_name = denoiser_name
         self.ddpm_sampler = DDPM(timesteps = self.cfg.GEN_MODEL.DDPM.TIMESTEPS)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.optimizer = torch.optim.AdamW(self.denoiser.parameters(), lr=self.cfg.GEN_MODEL.DDPM.TRAIN.LR)
-        self.scaler = amp.GradScaler()
+        denoiser_cfg = getattr(self.cfg.GEN_MODEL.DDPM, self.denoiser_name)
+        self.optimizer = torch.optim.AdamW(
+            self.denoiser.parameters(),
+            lr=denoiser_cfg.TRAIN.LR,
+            weight_decay=denoiser_cfg.TRAIN.WEIGHT_DECAY,
+        )
+        self.scaler = torch.amp.GradScaler('cuda')
         self.denoiser.to(self.device)
         self.ddpm_sampler.to(self.device)
 
@@ -26,7 +32,7 @@ class DDPM_model:
         t = torch.randint(low=0, high=self.ddpm_sampler.timesteps, size=(batch.shape[0],), device=batch.device)
         # Apply forward noising process on original images, up to step t (sample from q(x_t|x_0))
         x_noisy, eps_true = self.ddpm_sampler(batch, t)
-        with amp.autocast():
+        with torch.amp.autocast('cuda'):
             # Our prediction for the denoised image
             eps_predicted = self.denoiser(x_noisy, t)
             # Deduce the loss
@@ -37,9 +43,11 @@ class DDPM_model:
         loss_record = MeanMetric()
         # Set in training mode
         self.denoiser.train()
+        denoiser_cfg = getattr(self.cfg.GEN_MODEL.DDPM, self.denoiser_name)
+        epochs = denoiser_cfg.TRAIN.EPOCHS
 
         with tqdm(total=len(batched_train_dataloader), dynamic_ncols=True) as tq:
-            tq.set_description(f"Train :: Epoch: {epoch}/{self.cfg.GEN_MODEL.DDPM.TRAIN.EPOCHS}")
+            tq.set_description(f"Train :: Epoch: {epoch}/{epochs}")
             # Scan the batches
             for batch in batched_train_dataloader:
                 tq.update(1)
@@ -72,9 +80,10 @@ class DDPM_model:
 
         epoch_loss = []
         best_loss  = 1e6
-
+        denoiser_cfg = getattr(self.cfg.GEN_MODEL.DDPM, self.denoiser_name)
+        epochs = denoiser_cfg.TRAIN.EPOCHS
         # Training loop
-        for epoch in range(1, self.cfg.GEN_MODEL.DDPM.TRAIN.EPOCHS + 1):
+        for epoch in range(1, epochs + 1):
             torch.cuda.empty_cache()
             gc.collect()
 
@@ -90,17 +99,17 @@ class DDPM_model:
                     "scaler": self.scaler.state_dict(),
                     "model": self.denoiser.state_dict()
                 }
-                model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'
+                model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME.format(self.denoiser_name)}'
                 torch.save(checkpoint_dict, model_path)
                 logging.info(f"DDPM training: checkpoint saved at epoch:{epoch}")
                 del checkpoint_dict
 
         logging.info(f"DDPM: Done training! \n Trained model saved at {self.cfg.DATA_FS.SAVE_DIR}")
-        model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0]
+        model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0] +"_"+ self.denoiser_name
         plot_epoch_loss(epoch_loss, self.cfg.DATA_FS.OUTPUT_DIR, model_prefix)
 
     def _load_trained_model(self):
-        model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME}'
+        model_path = f'{self.cfg.DATA_FS.SAVE_DIR}/{self.cfg.GEN_MODEL.DDPM.NAME.format(self.denoiser_name)}'
 
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model file not found at: {model_path}")
@@ -114,7 +123,8 @@ class DDPM_model:
     def sampling(self, x_T, plot_func, *args):
         model_prefix = self.cfg.GEN_MODEL.DDPM.NAME.split("_")[0]
         logging.info("Init Sampling ...")
-        create_directory(self.cfg.DATA_FS.OUTPUT_DIR)
+        output_dir = f"{self.cfg.DATA_FS.OUTPUT_DIR}/DDPM_{self.denoiser_name}"
+        create_directory(output_dir)
 
         self._load_trained_model()
 
@@ -132,4 +142,4 @@ class DDPM_model:
                 xt_over_time.append((t, x_T))
 
         logging.info('Done sampling.')
-        plot_func(xt_over_time, model_prefix, self.cfg.DATA_FS.OUTPUT_DIR, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)
+        plot_func(xt_over_time, model_prefix, output_dir, self.cfg.PLOT.NAME, self.cfg.PLOT.FPS, *args)

@@ -10,28 +10,73 @@ DATASET:
 GEN_MODEL:
   MODEL_CHECKPOINT_FREQ: 50
   FM:
-    NAME: "fm_model_bflies.pth"
+    NAME: "fm_model_bflies_{}.pth"
     TIME_MAX_POS: 1000    #For UNet this variable match  TOTAL_TIME_STEPS
-    TRAIN:
-      LR: 0.0001
-      EPOCHS: 1000
+    UNET:
+      NUM_RES_BLOCKS: 1
+      INPUT_CHANNELS: 3
+      OUTPUT_CHANNELS: 3
+      BASE_CH: 64  # 64, 128, 256, 512
+      BASE_CH_MULT: [1, 2, 4, 8] # 32, 16, 8, 4
+      APPLY_ATTENTION: [False, True, True, False]
+      DROPOUT_RATE: 0.1
+      TIME_EMB_MULT: 4 # 128
+      TOTAL_TIME_STEPS: 1000
+      TIME_EMB_MAX_FREC: 10000
+      TRAIN:
+        LR: 0.0001
+        EPOCHS: 1000
+        WEIGHT_DECAY: 0.01
+    DIT:
+      INPUT_CHANNELS: 3
+      OUTPUT_CHANNELS: 3
+      PATCH_SIZE: 4 # With IMAGE_SIZE=64 and PATCH_SIZE=4 → 16×16 = 256 image tokens.
+      HIDDEN_SIZE: 256   # model width; try 512 for more capacity
+      DEPTH:       6     # number of DiT blocks
+      NUM_HEADS:   4     # HIDDEN_SIZE % NUM_HEADS must == 0
+      MLP_RATIO:   4.0
+      DROPOUT_RATE: 0.1
+      TIME_EMB_MULT: 4    # time_emb_dims_exp = HIDDEN_SIZE * TIME_MULTIPLE
+      TOTAL_TIME_STEPS: 1000
+      TIME_EMB_MAX_FREC: 10000
+      TRAIN:
+        LR: 0.0001
+        EPOCHS: 2000
+        WEIGHT_DECAY: 0.0
   DDPM:
-    NAME: "ddpm_model_bflies.pth"
+    NAME: "ddpm_model_bflies_{}.pth"
     TIMESTEPS: 1000 # Define number of diffusion timesteps
-    TRAIN:
-      LR: 0.0001
-      EPOCHS: 500
-UNET:
-  NUM_RES_BLOCKS: 1
-  INPUT_CHANNELS: 3
-  OUTPUT_CHANNELS: 3
-  BASE_CH: 64  # 64, 128, 256, 512
-  BASE_CH_MULT: [1, 2, 4, 8] # 32, 16, 8, 4
-  APPLY_ATTENTION: [False, True, True, False]
-  DROPOUT_RATE: 0.1
-  TIME_EMB_MULT: 4 # 128
-  TOTAL_TIME_STEPS: 1000
-  TIME_EMB_MAX_FREC: 10000
+    UNET:
+      NUM_RES_BLOCKS: 1
+      INPUT_CHANNELS: 3
+      OUTPUT_CHANNELS: 3
+      BASE_CH: 64  # 64, 128, 256, 512
+      BASE_CH_MULT: [1, 2, 4, 8] # 32, 16, 8, 4
+      APPLY_ATTENTION: [False, True, True, False]
+      DROPOUT_RATE: 0.1
+      TIME_EMB_MULT: 4 # 128
+      TOTAL_TIME_STEPS: 1000
+      TIME_EMB_MAX_FREC: 10000
+      TRAIN:
+        LR: 0.0001
+        EPOCHS: 500
+        WEIGHT_DECAY: 0.01
+    DIT:
+      INPUT_CHANNELS: 3
+      OUTPUT_CHANNELS: 3
+      PATCH_SIZE: 4 # With IMAGE_SIZE=64 and PATCH_SIZE=4 → 16×16 = 256 image tokens.
+      HIDDEN_SIZE: 256   # model width; try 512 for more capacity
+      DEPTH:       6     # number of DiT blocks
+      NUM_HEADS:   4     # HIDDEN_SIZE % NUM_HEADS must == 0
+      MLP_RATIO:   4.0
+      DROPOUT_RATE: 0.1
+      TIME_EMB_MULT: 4    # time_emb_dims_exp = HIDDEN_SIZE * TIME_MULTIPLE
+      TOTAL_TIME_STEPS: 1000
+      TIME_EMB_MAX_FREC: 10000
+      TRAIN:
+        LR: 0.0001
+        EPOCHS: 1000
+        WEIGHT_DECAY: 0.0
 SAMPLING:
   NUM_SAMPLES: 16
   STEPS: 1000
